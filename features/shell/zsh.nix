@@ -24,6 +24,8 @@ mkFeature {
       message = "features.bash and features.zsh cannot both be enabled. Pick one.";
     }];
 
+    features.ls.enable = lib.mkDefault true;
+
     programs.zsh = {
       enable = true;
       package = config.features.zsh.package;

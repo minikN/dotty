@@ -2,7 +2,6 @@
 
 mkFeature {
   name = "ls";
-  enableByDefault = true;
 
   home = { config, lib, pkgs, ... }:
     let
