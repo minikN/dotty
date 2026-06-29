@@ -12,7 +12,7 @@ mkFeature {
 
   options = { config, ... }:
     let
-      home = config.features.userInfo.homeDirectory;
+      home = config.features.user.homeDirectory;
       cap = config.features.xdg.capitalizeUserDirs;
       dir = name: "${home}/${if cap then capitalize name else name}";
     in

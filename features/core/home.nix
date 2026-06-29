@@ -20,7 +20,7 @@ mkFeature {
       shell = config.globals.apps.shell;
       wm = config.globals.apps.wm;
       tty = config.features.home.autoStartWmOnTty;
-      user = config.features.userInfo.username;
+      user = config.features.user.username;
     in
     {
       environment.shells = mkIf (shell != null) [ shell ];
@@ -34,7 +34,7 @@ mkFeature {
   darwin = { config, ... }:
     let
       shell = config.globals.apps.shell;
-      user = config.features.userInfo.username;
+      user = config.features.user.username;
     in
     {
       system.primaryUser = user;

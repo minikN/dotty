@@ -4,7 +4,7 @@ let
   inherit (lib) mkOption types;
 in
 mkFeature {
-  name = "userInfo";
+  name = "user";
   enableByDefault = true;
 
   options = { config, ... }: {
@@ -27,8 +27,8 @@ mkFeature {
       type = types.str;
       default =
         if config.globals.platform == "darwin"
-        then "/Users/${config.features.userInfo.username}"
-        else "/home/${config.features.userInfo.username}";
+        then "/Users/${config.features.user.username}"
+        else "/home/${config.features.user.username}";
       description = "Home directory.";
     };
     extraGroups = mkOption {
@@ -39,23 +39,23 @@ mkFeature {
   };
 
   nixos = { config, ... }: {
-    users.users.${config.features.userInfo.username} = {
+    users.users.${config.features.user.username} = {
       isNormalUser = true;
-      home = config.features.userInfo.homeDirectory;
-      description = config.features.userInfo.fullName;
-      extraGroups = config.features.userInfo.extraGroups;
+      home = config.features.user.homeDirectory;
+      description = config.features.user.fullName;
+      extraGroups = config.features.user.extraGroups;
     };
   };
 
   darwin = { config, ... }: {
-    users.users.${config.features.userInfo.username} = {
-      home = config.features.userInfo.homeDirectory;
-      description = config.features.userInfo.fullName;
+    users.users.${config.features.user.username} = {
+      home = config.features.user.homeDirectory;
+      description = config.features.user.fullName;
     };
   };
 
   home = { config, ... }: {
-    home.username = lib.mkDefault config.features.userInfo.username;
-    home.homeDirectory = lib.mkDefault config.features.userInfo.homeDirectory;
+    home.username = lib.mkDefault config.features.user.username;
+    home.homeDirectory = lib.mkDefault config.features.user.homeDirectory;
   };
 }
