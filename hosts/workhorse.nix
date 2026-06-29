@@ -2,10 +2,11 @@
   system = "aarch64-darwin";
 
   features = {
+    font.enable = true;
+    theme.enable = true;
     zsh = {
       enable = true;
       extraConfig = ''
-        export PATH="$HOME/.local/bin:$PATH"
         export PATH="/opt/homebrew/bin:$PATH"
       '';
     };
