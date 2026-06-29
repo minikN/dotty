@@ -13,6 +13,11 @@ in
       type = types.enum [ "nixos" "darwin" ];
       description = "Host platform.";
     };
+    wayland = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Whether the host runs a Wayland session.";
+    };
     apps = {
       shell = mkOption {
         type = types.nullOr types.str;
