@@ -65,9 +65,11 @@ mkFeature {
         linkApps.enable = false;
       };
 
-      ## GUI apps launched via Spotlight/Finder don't inherit env vars set
-      ## in .zprofile. Push the home-manager session variables into the
-      ## GUI launchd context at login.
+      ## GUI apps launched from Dock/Spotlight inherit env vars from the
+      ## user's launchd session, not from a shell's startup files. Push
+      ## the home-manager-managed env into the launchd session at login
+      ## so GUI apps (and the terminals they spawn) see the same PATH +
+      ## variables as a fresh login shell.
       launchd.agents.session-environment = {
         enable = true;
         config = {
@@ -76,7 +78,20 @@ mkFeature {
           ProgramArguments =
             let
               script = pkgs.writeShellScript "session-environment" ''
-                export PATH="/bin:/usr/bin:/usr/local/bin"
+                export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+                ## Replicate what a fresh login shell would build up:
+                ##   /etc/profile -> /etc/bashrc -> nix-darwin's
+                ##     setEnvironment, contributing nix store paths.
+                ##   ~/.profile  -> hm-session-vars.sh + any shell
+                ##     feature's profileExtra (e.g. /opt/homebrew/bin,
+                ##     $HOME/.local/bin).
+                ## Then publish the resulting PATH into the launchd
+                ## session so GUI apps inherit the same PATH as Terminal.
+                [ -r /etc/profile ]    && . /etc/profile
+                [ -r "$HOME/.profile" ] && . "$HOME/.profile"
+                launchctl setenv PATH "$PATH"
+
                 ${lib.concatStringsSep "\n" (
                   lib.mapAttrsToList
                     (n: v: "launchctl setenv ${n} \"${v}\"")
