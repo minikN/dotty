@@ -13,16 +13,24 @@ mkFeature {
   };
 
   globals = { config, ... }: {
-    apps.shell = lib.mkIf config.features.zsh.enable
+    apps.shell = lib.mkIf
+      (config.features.zsh.enable && !config.features.bash.enable)
       "${config.features.zsh.package}/bin/zsh";
   };
 
   home = { config, ... }: {
+    assertions = [{
+      assertion = !(config.features.bash.enable && config.features.zsh.enable);
+      message = "features.bash and features.zsh cannot both be enabled. Pick one.";
+    }];
+
     programs.zsh = {
       enable = true;
       package = config.features.zsh.package;
       enableCompletion = true;
       syntaxHighlighting.enable = true;
+      dotDir = "${config.xdg.configHome}/zsh";
+      history.path = "${config.xdg.stateHome}/zsh/history";
       profileExtra = config.features.zsh.extraConfig;
     };
   };
