@@ -3,6 +3,7 @@
 
   features = {
     zsh.enable = true;
+    nas.enable = true;
 
     ssh = {
       enable = true;
@@ -14,11 +15,21 @@
     };
   };
 
-  nixos = { inputs, pkgs, ... }: {
+  nixos = { config, inputs, pkgs, ... }: {
     imports = [
       inputs.nixos-hardware.nixosModules.common-cpu-intel
       inputs.nixos-hardware.nixosModules.common-pc-ssd
+      inputs.agenix.nixosModules.default
     ];
+
+    age.secrets.smb-credentials = {
+      file = ../secrets/smb-credentials.age;
+      owner = "root";
+      group = "root";
+      mode = "0600";
+    };
+
+    features.nas.credentialsFile = config.age.secrets.smb-credentials.path;
 
     networking.hostName = "orcshed";
 
