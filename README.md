@@ -5,34 +5,6 @@ discovered from `hosts/`, features from `features/`. There is no central
 "register every machine here" file: drop a `.nix` file in the right folder
 and it is picked up.
 
-## Layout
-
-```
-.
-├── flake.nix                 # entry point — discovers hosts/features and dispatches
-├── globals.nix               # static constants (user, email, gpgKey, stateVersion)
-├── lib/
-│   ├── default.nix
-│   ├── discover.nix          # walks hosts/ and features/
-│   ├── globals-options.nix   # declares options.globals.*
-│   ├── mk-feature.nix        # feature helper
-│   └── mk-host.nix           # builds a host's system + home configurations
-├── hosts/                    # one file per host (filename = host name)
-│   ├── slimboy.nix
-│   └── workhorse.nix
-└── features/                 # feature modules; folder layout is free
-    ├── core/
-    │   ├── home.nix
-    │   └── user-info.nix
-    ├── shell/
-    │   └── zsh.nix
-    └── system/
-        ├── base.nix
-        ├── bootloader.nix
-        ├── filesystem.nix
-        └── nas.nix
-```
-
 ## How it works
 
 `flake.nix` does three things:
@@ -51,10 +23,42 @@ So every host gets both an embedded path (`{nixos,darwin}-rebuild switch`,
 system + home together) and a standalone path (`home-manager switch`, home
 only) for free.
 
+## Deploying
+
+### Local nix-darwin host
+
 ```bash
-sudo darwin-rebuild switch --flake .#workhorse
-sudo nixos-rebuild  switch --flake .#slimboy
-home-manager        switch --flake .#slimboy
+sudo -E darwin-rebuild switch --flake .#workhorse
+```
+
+`-E` preserves the invoking user's environment so user-level bits (e.g.
+`$HOME`, `$USER`) stay correct after `sudo`. `switch` builds the new
+generation and activates it.
+
+### Remote NixOS host (over SSH)
+
+```bash
+nix run nixpkgs#nixos-rebuild -- switch --flake .#orcshed \
+  --target-host db@10.0.0.10 --build-host db@10.0.0.10 \
+  --elevate=sudo --ask-elevate-password
+```
+
+- `nix run nixpkgs#nixos-rebuild --` — pulls `nixos-rebuild` from nixpkgs
+  on demand, useful when running from a darwin host that doesn't have it
+  installed.
+- `--flake .#orcshed` — the host config from this flake.
+- `--target-host db@10.0.0.10` — SSH endpoint that performs the activation.
+- `--build-host db@10.0.0.10` — also build there. Pointing it at the
+  target avoids cross-compiling `x86_64-linux` on `aarch64-darwin`. Drop
+  it if you already have a Linux remote builder configured.
+- `--elevate=sudo --ask-elevate-password` — escalate to root via `sudo`
+  on the remote, prompting for the sudo password locally (rather than
+  requiring NOPASSWD).
+
+### Standalone home-manager (no system config)
+
+```bash
+home-manager switch --flake .#slimboy
 ```
 
 ## Hosts
