@@ -1,7 +1,18 @@
 {
   system = "x86_64-linux";
 
-  features = {};
+  features = {
+    zsh.enable = true;
+
+    ssh = {
+      enable = true;
+      daemon = {
+        enable = true;
+        passwordAuthentication = false;
+      };
+      authorizedKeyFiles = [ ../keys/db.pub ];
+    };
+  };
 
   nixos = { inputs, pkgs, ... }: {
     imports = [
