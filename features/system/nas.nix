@@ -9,7 +9,7 @@ mkFeature {
   options = {
     host = mkOption {
       type = types.str;
-      default = "192.168.178.26";
+      default = "10.0.0.11";
       description = "Hostname or IP of the NAS.";
     };
     mountBase = mkOption {
@@ -29,7 +29,7 @@ mkFeature {
         shows = "shows";
         music = "music";
         audiobooks = "audiobooks";
-        temp = "Temp";
+        temp = "temp";
       };
       description = "Mount-name → remote-share-name map.";
     };
