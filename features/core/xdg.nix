@@ -27,6 +27,42 @@ mkFeature {
         '';
       };
 
+      baseDirs = mkOption {
+        description = ''
+          XDG base directories. These get forced into home-manager's
+          `xdg.configHome`/`dataHome`/`cacheHome`/`stateHome`, so any
+          consumer that reads `config.xdg.*` picks up the overrides
+          automatically. Override per-host to relocate (e.g. put cache
+          on a faster disk).
+        '';
+        default = {
+          configHome = "${home}/.config";
+          dataHome = "${home}/.local/share";
+          cacheHome = "${home}/.cache";
+          stateHome = "${home}/.local/state";
+        };
+        type = types.submodule {
+          options = {
+            configHome = mkOption {
+              type = types.str;
+              description = "XDG_CONFIG_HOME path.";
+            };
+            dataHome = mkOption {
+              type = types.str;
+              description = "XDG_DATA_HOME path.";
+            };
+            cacheHome = mkOption {
+              type = types.str;
+              description = "XDG_CACHE_HOME path.";
+            };
+            stateHome = mkOption {
+              type = types.str;
+              description = "XDG_STATE_HOME path.";
+            };
+          };
+        };
+      };
+
       userDirs = mkOption {
         type = types.attrsOf (types.nullOr types.str);
         description = ''
@@ -68,7 +104,15 @@ mkFeature {
       activeDirs = lib.filterAttrs (_: v: v != null) cfg.userDirs;
     in
     mkMerge [
-      { xdg.enable = true; }
+      {
+        xdg = {
+          enable = true;
+          configHome = lib.mkForce cfg.baseDirs.configHome;
+          dataHome = lib.mkForce cfg.baseDirs.dataHome;
+          cacheHome = lib.mkForce cfg.baseDirs.cacheHome;
+          stateHome = lib.mkForce cfg.baseDirs.stateHome;
+        };
+      }
 
       (mkIf (config.globals.platform == "nixos") {
         xdg.mime.enable = true;
