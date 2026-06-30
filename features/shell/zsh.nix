@@ -18,6 +18,13 @@ mkFeature {
       "${config.features.zsh.package}/bin/zsh";
   };
 
+  ## Enable nix-darwin/NixOS's system-level zsh module so /etc/zprofile
+  ## and /etc/zshrc are generated. Without this on NixOS, login zsh
+  ## shells never see `environment.loginShellInit` (which is what wires
+  ## up things like `features.home.autoStartWmOnTty`). On darwin this
+  ## is the default anyway.
+  nixos = _: { programs.zsh.enable = true; };
+
   home = { config, ... }: {
     assertions = [{
       assertion = !(config.features.bash.enable && config.features.zsh.enable);
