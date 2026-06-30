@@ -13,6 +13,27 @@
       };
       authorizedKeyFiles = [ ../keys/db.pub ];
     };
+
+    caddy = {
+      enable = true;
+      vhosts."jellyfin.minikn.xyz".backend = "http://127.0.0.1:8096";
+      vhosts."books.minikn.xyz".backend = "http://127.0.0.1:8000";
+    };
+
+    fail2ban.enable = true;
+
+    audiobookshelf = {
+      enable = true;
+      host = "127.0.0.1";
+      openFirewall = false;
+      mediaGroups = [ "users" ];
+    };
+
+    jellyfin = {
+      enable = true;
+      openFirewall = false;
+      mediaGroups = [ "users" ];
+    };
   };
 
   nixos = { config, inputs, pkgs, ... }: {
