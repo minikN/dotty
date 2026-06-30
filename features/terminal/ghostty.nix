@@ -3,8 +3,21 @@
 mkFeature {
   name = "ghostty";
 
-  options = { pkgs, ... }: {
-    package = lib.mkPackageOption pkgs "ghostty-bin" { };
+  options = { config, pkgs, ... }: {
+    package = lib.mkOption {
+      type = lib.types.package;
+      default =
+        if config.globals.platform == "darwin"
+        then pkgs.ghostty-bin
+        else pkgs.ghostty;
+      defaultText = lib.literalExpression
+        "pkgs.ghostty-bin on darwin, pkgs.ghostty on linux";
+      description = ''
+        Ghostty package. On darwin we default to the prebuilt
+        `ghostty-bin` (`.app` bundle); on linux that variant is marked
+        as unavailable, so we default to the source-built `ghostty`.
+      '';
+    };
   };
 
   globals = { config, ... }: {
@@ -18,7 +31,7 @@ mkFeature {
   home = { config, ... }:
     let
       mono = config.features.font.fonts.monospace;
-      scheme = config.features.theme.scheme;
+      hex = config.features.theme.scheme.withHashtag;
     in
     {
       programs.ghostty = {
@@ -46,30 +59,30 @@ mkFeature {
           font-size = mono.size;
         };
 
-        themes.dotty = with scheme; {
-          background = "#${base00}";
-          cursor-color = "#${base05}";
-          foreground = "#${base05}";
+        themes.dotty = with hex; {
+          background = base00;
+          cursor-color = base05;
+          foreground = base05;
           palette = [
-            "0=#${base05}"
-            "1=#${base08}"
-            "2=#${base0B}"
-            "3=#${base0A}"
-            "4=#${base0D}"
-            "5=#${base0E}"
-            "6=#${base0C}"
-            "7=#${base05}"
-            "8=#${base03}"
-            "9=#${base08}"
-            "10=#${base0B}"
-            "11=#${base0A}"
-            "12=#${base0D}"
-            "13=#${base0E}"
-            "14=#${base0C}"
-            "15=#${base06}"
+            "0=${base05}"
+            "1=${base08}"
+            "2=${base0B}"
+            "3=${base0A}"
+            "4=${base0D}"
+            "5=${base0E}"
+            "6=${base0C}"
+            "7=${base05}"
+            "8=${base03}"
+            "9=${base08}"
+            "10=${base0B}"
+            "11=${base0A}"
+            "12=${base0D}"
+            "13=${base0E}"
+            "14=${base0C}"
+            "15=${base06}"
           ];
-          selection-background = "#${base02}";
-          selection-foreground = "#${base05}";
+          selection-background = base02;
+          selection-foreground = base05;
         };
       };
     };
