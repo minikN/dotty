@@ -2,7 +2,7 @@
   system = "x86_64-linux";
 
   features = {
-    home.autoStartWmOnTty = "/dev/tty1";
+    home.autostartWmOnTTY = "/dev/tty1";
     sway.enable = true;
     gtk.enable = true;
     theme.enable = true;

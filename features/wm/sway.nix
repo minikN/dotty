@@ -13,57 +13,32 @@ mkFeature {
       modifier = mkOption {
         type = types.str;
         default = "Mod4";
-        description = "Sway modifier key (Mod4 = Super/Cmd).";
+        description = "Modifier key (Mod4 = Super).";
       };
 
-      left = mkOption {
-        type = types.str;
-        default = "h";
-        description = "Key bound to the `left` direction.";
-      };
-      right = mkOption {
-        type = types.str;
-        default = "l";
-        description = "Key bound to the `right` direction.";
-      };
-      up = mkOption {
-        type = types.str;
-        default = "k";
-        description = "Key bound to the `up` direction.";
-      };
-      down = mkOption {
-        type = types.str;
-        default = "j";
-        description = "Key bound to the `down` direction.";
-      };
+      left  = mkOption { type = types.str; default = "h"; description = "Key for `left`."; };
+      right = mkOption { type = types.str; default = "l"; description = "Key for `right`."; };
+      up    = mkOption { type = types.str; default = "k"; description = "Key for `up`."; };
+      down  = mkOption { type = types.str; default = "j"; description = "Key for `down`."; };
 
-      useGlobalBar = mkEnableOption ''
-        having sway spawn and supervise the global bar (vs. running the
-        bar as a standalone user systemd service)'';
+      useGlobalBar = mkEnableOption "sway-spawned global bar";
 
       extraGlobalBarSettings = mkOption {
         type = types.attrs;
         default = { };
-        description = "Extra fields merged into sway's `bar` block when `useGlobalBar = true`.";
+        description = "Extra fields merged into sway's `bar` block.";
       };
 
       extraKeybindings = mkOption {
         type = types.attrsOf types.str;
         default = { };
-        description = ''
-          Extra Sway keybindings. Use `config.features.sway.modifier`
-          and friends to compose key combos that respect the configured
-          modifier/direction keys.
-        '';
+        description = "Extra keybindings (merged on top of defaults).";
       };
 
       extraConfig = mkOption {
         type = types.attrs;
         default = { };
-        description = ''
-          Extra fields recursively merged into the generated sway
-          config attrset (overrides existing keys).
-        '';
+        description = "Extra fields recursively merged into the sway config.";
       };
     };
 
@@ -80,8 +55,7 @@ mkFeature {
   nixos = _: {
     hardware.graphics.enable = true;
     security.polkit.enable = true;
-    ## Tell Chromium/Electron apps to use native Wayland windows.
-    environment.sessionVariables.NIXOS_OZONE_WL = "1";
+    environment.sessionVariables.NIXOS_OZONE_WL = "1";  ## chromium/electron → wayland
   };
 
   home = { config, lib, pkgs, ... }:
@@ -151,9 +125,7 @@ mkFeature {
               border = 2;
             };
 
-            ## Note: ordenada brightens/darkens base0D for the focused
-            ## tint via nix-rice. We don't have nix-rice; use base0D
-            ## directly. Slightly less polished but still legible.
+            ## base0D for focused; ordenada brightens/darkens via nix-rice.
             colors =
               let
                 bg = hex.base00;

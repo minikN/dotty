@@ -36,7 +36,6 @@ mkFeature {
       historyFile = "${config.xdg.stateHome}/bash/history";
       profileExtra = config.features.bash.extraConfig;
       bashrcExtra = ''
-        ## bash-completion: standard completion definitions
         [[ $- == *i* && -r ${pkgs.bash-completion}/etc/profile.d/bash_completion.sh ]] && \
           source ${pkgs.bash-completion}/etc/profile.d/bash_completion.sh
       '';

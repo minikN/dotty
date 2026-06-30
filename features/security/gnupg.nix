@@ -11,13 +11,13 @@ mkFeature {
       sshKeys = mkOption {
         type = types.listOf types.str;
         default = [ ];
-        description = "List of GPG keygrips to expose via gpg-agent's SSH socket.";
+        description = "GPG keygrips exposed via gpg-agent's SSH socket.";
       };
 
       defaultTtl = mkOption {
         type = types.int;
         default = 86400;
-        description = "Cache TTL for GnuPG passphrases, in seconds.";
+        description = "Passphrase cache TTL (seconds).";
       };
 
       pinentryPackage = mkOption {
@@ -26,30 +26,19 @@ mkFeature {
           if config.globals.platform == "darwin"
           then pkgs.pinentry_mac
           else pkgs.pinentry-qt;
-        description = "Pinentry program for passphrase prompts.";
+        description = "Pinentry binary used for prompts.";
       };
 
       storeDir = mkOption {
         type = types.str;
         default = "${config.features.user.homeDirectory}/.gnupg";
-        description = ''
-          GnuPG home directory (sets `programs.gpg.homedir` and
-          GNUPGHOME). Defaults to `~/.gnupg` to match home-manager's
-          default — change to e.g. `"''${config.features.xdg.baseDirs.dataHome}/gnupg"`
-          for an XDG-clean layout, but migrate the existing keyring
-          before deploying or you'll lose access.
-        '';
+        description = "GNUPGHOME / programs.gpg.homedir. Migrate keyring before changing.";
       };
 
       keychainInteraction = mkOption {
         type = types.bool;
         default = true;
-        description = ''
-          Whether pinentry-mac should offer to save the passphrase to
-          the macOS Keychain (darwin only). Toggled via a launchd
-          agent that runs `defaults write org.gpgtools.pinentry-mac …`
-          at login.
-        '';
+        description = "darwin: pinentry-mac may save passphrases to the Keychain.";
       };
     };
 
@@ -77,10 +66,7 @@ mkFeature {
       }
 
       (lib.mkIf (config.globals.platform == "darwin") {
-        ## pinentry-mac stores its keychain preference in macOS
-        ## defaults, not gpg-agent.conf. A launchd agent at login
-        ## writes the user's choice so subsequent passphrase prompts
-        ## honour it.
+        ## pinentry-mac reads its keychain pref from macOS defaults.
         launchd.agents.pinentry-keychainIntegration = {
           enable = true;
           config = {

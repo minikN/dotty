@@ -6,9 +6,7 @@ mkFeature {
   home = { config, lib, pkgs, ... }:
     let
       isDarwin = config.globals.platform == "darwin";
-      ## BSD ls (apple) can't group directories first; pull in GNU ls
-      ## via coreutils-prefixed which installs g-prefixed binaries
-      ## (gls, gcat, …) without clobbering Apple's defaults.
+      ## Use GNU ls (gls) on darwin; BSD ls can't group-directories-first.
       binary = if isDarwin then "gls" else "ls";
     in
     {

@@ -26,19 +26,18 @@ mkFeature {
     authorizedKeyFiles = mkOption {
       type = types.listOf types.path;
       default = [ ];
-      description = "Public key files authorized for the configured user.";
+      description = "Public key files authorized for the user.";
     };
 
     matchBlocks = mkOption {
       type = types.attrs;
       default = { };
-      description = "SSH client match-block configuration";
+      description = "SSH client match-block stanzas.";
     };
   };
 
   home = { config, ... }: {
-    ## Only run ssh-agent if gpg-agent isn't already providing the SSH
-    ## socket — avoids two agents fighting over SSH_AUTH_SOCK.
+    ## Skip ssh-agent when gpg-agent owns the SSH socket.
     services.ssh-agent.enable =
       mkDefault (!(config.services.gpg-agent.enableSshSupport or false));
 

@@ -15,16 +15,12 @@ mkFeature {
           package = mkOption {
             type = types.nullOr types.package;
             default = null;
-            description = ''
-              Font package to install. Set to null to skip installation
-              (e.g. when the font ships with the OS, like Apple Color
-              Emoji on darwin).
-            '';
+            description = "Font package; null to skip install (e.g. OS-shipped).";
           };
           size = mkOption {
             type = types.int;
             default = 11;
-            description = "Font size in points.";
+            description = "Size in points.";
           };
         };
       };
@@ -57,21 +53,12 @@ mkFeature {
         unicode = mkOption {
           type = fontModule;
           description = "Unicode / emoji font.";
+          ## On darwin use Apple Color Emoji; noto-fonts-color-emoji's
+          ## afdko build is broken on aarch64-darwin.
           default =
             if config.globals.platform == "darwin"
-            then {
-              ## macOS ships Apple Color Emoji; don't pull in
-              ## noto-fonts-color-emoji (which currently fails to build
-              ## via afdko on aarch64-darwin).
-              name = "Apple Color Emoji";
-              package = null;
-              size = 11;
-            }
-            else {
-              name = "Noto Color Emoji";
-              package = pkgs.noto-fonts-color-emoji;
-              size = 11;
-            };
+            then { name = "Apple Color Emoji"; package = null; size = 11; }
+            else { name = "Noto Color Emoji"; package = pkgs.noto-fonts-color-emoji; size = 11; };
         };
       };
     };

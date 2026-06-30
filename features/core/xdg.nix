@@ -20,21 +20,11 @@ mkFeature {
       capitalizeUserDirs = mkOption {
         type = types.bool;
         default = config.globals.platform == "darwin";
-        description = ''
-          Whether to capitalize the basename of XDG user directories
-          (Documents, Downloads, …). Defaults to true on darwin to match
-          macOS conventions.
-        '';
+        description = "Capitalize XDG user-dir basenames (defaults true on darwin).";
       };
 
       baseDirs = mkOption {
-        description = ''
-          XDG base directories. These get forced into home-manager's
-          `xdg.configHome`/`dataHome`/`cacheHome`/`stateHome`, so any
-          consumer that reads `config.xdg.*` picks up the overrides
-          automatically. Override per-host to relocate (e.g. put cache
-          on a faster disk).
-        '';
+        description = "XDG base directories; forced into home-manager's xdg.*Home.";
         default = {
           configHome = "${home}/.config";
           dataHome = "${home}/.local/share";
@@ -43,32 +33,17 @@ mkFeature {
         };
         type = types.submodule {
           options = {
-            configHome = mkOption {
-              type = types.str;
-              description = "XDG_CONFIG_HOME path.";
-            };
-            dataHome = mkOption {
-              type = types.str;
-              description = "XDG_DATA_HOME path.";
-            };
-            cacheHome = mkOption {
-              type = types.str;
-              description = "XDG_CACHE_HOME path.";
-            };
-            stateHome = mkOption {
-              type = types.str;
-              description = "XDG_STATE_HOME path.";
-            };
+            configHome = mkOption { type = types.str; description = "XDG_CONFIG_HOME."; };
+            dataHome   = mkOption { type = types.str; description = "XDG_DATA_HOME."; };
+            cacheHome  = mkOption { type = types.str; description = "XDG_CACHE_HOME."; };
+            stateHome  = mkOption { type = types.str; description = "XDG_STATE_HOME."; };
           };
         };
       };
 
       userDirs = mkOption {
         type = types.attrsOf (types.nullOr types.str);
-        description = ''
-          XDG user directories. Keys match home-manager's xdg.userDirs
-          attribute names. Set an entry to null to omit it.
-        '';
+        description = "XDG user dirs (null entries omitted).";
         default = {
           desktop = null;
           documents = dir "documents";

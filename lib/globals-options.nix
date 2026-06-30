@@ -7,7 +7,7 @@ in
   options.globals = {
     user = mkOption {
       type = types.attrs;
-      description = "User-supplied static globals (from globals.nix).";
+      description = "Static globals from globals.nix.";
     };
     platform = mkOption {
       type = types.enum [ "nixos" "darwin" ];
@@ -16,65 +16,28 @@ in
     wayland = mkOption {
       type = types.bool;
       default = false;
-      description = "Whether the host runs a Wayland session.";
+      description = "Host runs a Wayland session.";
     };
     apps = {
-      shell = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "System-wide shell binary.";
-      };
-      terminal = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "System-wide terminal.";
-      };
-      editor = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "System-wide editor.";
-      };
-      wm = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "System-wide window manager.";
-      };
-      launcher = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "System-wide application launcher.";
-      };
-      bar = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "System-wide status bar.";
-      };
-      passwordManager = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "System-wide password manager front-end.";
-      };
+      shell           = mkOption { type = types.nullOr types.str; default = null; description = "System shell."; };
+      terminal        = mkOption { type = types.nullOr types.str; default = null; description = "System terminal."; };
+      editor          = mkOption { type = types.nullOr types.str; default = null; description = "System editor."; };
+      wm              = mkOption { type = types.nullOr types.str; default = null; description = "System window manager."; };
+      launcher        = mkOption { type = types.nullOr types.str; default = null; description = "System app launcher."; };
+      bar             = mkOption { type = types.nullOr types.str; default = null; description = "System status bar."; };
+      passwordManager = mkOption { type = types.nullOr types.str; default = null; description = "System password manager."; };
     };
 
     autoloads = mkOption {
       type = types.listOf types.str;
       default = [ ];
-      description = ''
-        Commands to run automatically when the window manager starts.
-        Consumed by WM features (sway, …) and fed into their `startup`
-        block.
-      '';
+      description = "Commands fed into the WM's startup block.";
     };
 
     wmControlledBar = mkOption {
       type = types.bool;
       default = false;
-      description = ''
-        Coordination signal between the WM and the bar feature. Set
-        true by the WM feature (e.g. sway) when it spawns the bar
-        itself; bar features (e.g. waybar) read this to decide whether
-        to run themselves as a standalone user systemd service.
-      '';
+      description = "WM spawns the bar; bar features skip their own systemd service.";
     };
   };
 }

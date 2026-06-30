@@ -38,38 +38,23 @@ mkFeature {
         type = types.attrsOf types.str;
         apply = mkSchemeAttrs;
         default = rawSchemes.${config.features.theme.polarity};
-        description = ''
-          Base16 color scheme. Set as plain hex (no `#`); the option's
-          apply function attaches a `withHashtag` sub-attrset so
-          consumers can use either form (`scheme.base00` or
-          `scheme.withHashtag.base00`).
-        '';
+        description = "Base16 scheme (plain hex; `scheme.withHashtag.*` exposes the `#`-prefixed form).";
       };
 
       defaultSchemes = mkOption {
         type = types.attrs;
         readOnly = true;
         default = lib.mapAttrs (_: mkSchemeAttrs) rawSchemes;
-        description = ''
-          Built-in light/dark schemes (read-only). Exposed so consumers
-          can look up the opposite polarity's scheme — e.g. for a theme
-          toggler that needs both palettes at build time.
-        '';
+        description = "Built-in light/dark schemes for consumers that need both palettes.";
       };
 
       wallpaper = mkOption {
         type = types.nullOr types.path;
         default = null;
-        description = ''
-          Optional wallpaper path. Null means no wallpaper — downstream
-          features (sway, gtk, …) should fall back to a solid colour
-          from the scheme.
-        '';
+        description = "Wallpaper path; null falls back to a solid colour from `scheme`.";
       };
 
-      enableToggle = mkEnableOption ''
-        runtime light/dark switching via a NixOS specialisation and a
-        `toggle-theme` shell wrapper'';
+      enableToggle = mkEnableOption "runtime light/dark switching via NixOS specialisation";
     };
 
   nixos = { config, ... }:
@@ -78,9 +63,7 @@ mkFeature {
       otherPolarity = other cfg.polarity;
     in
     lib.mkIf cfg.enableToggle {
-      ## Let any wheel user invoke switch-to-configuration for either
-      ## the main system or the opposite-polarity specialisation
-      ## without prompting for a password.
+      ## NOPASSWD so toggle-theme can flip specialisations without prompting.
       security.sudo.extraRules = [{
         runAs = "root";
         groups = [ "wheel" ];
@@ -96,9 +79,7 @@ mkFeature {
         ];
       }];
 
-      ## Specialisation = a sibling system config identical to the
-      ## main one but with polarity flipped. `switch-to-configuration`
-      ## inside the specialisation activates the alternate scheme.
+      ## Sibling config with polarity flipped; activated by toggle-theme.
       specialisation.${otherPolarity}.configuration = {
         features.theme.polarity = lib.mkForce otherPolarity;
         features.theme.scheme = lib.mkForce rawSchemes.${otherPolarity};

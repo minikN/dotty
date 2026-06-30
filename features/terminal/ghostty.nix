@@ -10,13 +10,8 @@ mkFeature {
         if config.globals.platform == "darwin"
         then pkgs.ghostty-bin
         else pkgs.ghostty;
-      defaultText = lib.literalExpression
-        "pkgs.ghostty-bin on darwin, pkgs.ghostty on linux";
-      description = ''
-        Ghostty package. On darwin we default to the prebuilt
-        `ghostty-bin` (`.app` bundle); on linux that variant is marked
-        as unavailable, so we default to the source-built `ghostty`.
-      '';
+      defaultText = lib.literalExpression "ghostty-bin on darwin, ghostty on linux";
+      description = "Ghostty package for the current platform.";
     };
   };
 

@@ -22,10 +22,7 @@ let
 
   user = globals.user;
 
-  ## Modules that need to be visible in BOTH the system config and the
-  ## user's home-manager config: the globals options, the static-globals
-  ## values, the host's feature toggles, and each feature's commonModule
-  ## (which declares its options and may contribute to globals).
+  ## Shared by system + home-manager: globals, host feature toggles, options.
   globalsOptionsModule = import ./globals-options.nix;
 
   staticGlobalsModule = { ... }: {
