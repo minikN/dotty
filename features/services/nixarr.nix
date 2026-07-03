@@ -45,6 +45,8 @@ mkFeature {
           vpnTestService.enable = cfg.vpnTestService;
         };
 
+        ## To access transmission's web GUI. Use a ssh tunnel:
+        ## ssh -L 9091:localhost:9091 <user>@<host>
         transmission = {
           enable = cfg.transmission;
           peerPort = cfg.peerPort;
