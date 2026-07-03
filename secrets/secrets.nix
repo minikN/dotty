@@ -8,7 +8,7 @@ let
 in
 {
   "smb-credentials.age".publicKeys = [ db orcshed ];
-  "wg-1.age".publicKeys = [ db orcshed ];
-  "wg-2.age".publicKeys = [ db orcshed ];
-  "wg-3.age".publicKeys = [ db orcshed ];
+  "wg-1.conf.age".publicKeys = [ db orcshed ];
+  "wg-2.conf.age".publicKeys = [ db orcshed ];
+  "wg-3.conf.age".publicKeys = [ db orcshed ];
 }
