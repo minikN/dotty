@@ -90,10 +90,22 @@ name. The only required key is `system`; the platform is inferred from it.
 }
 ```
 
+`features` may also be a module function when an option needs `config` — e.g.
+wiring an agenix secret path into a feature:
+
+```nix
+features = { config, ... }: {
+  nas = {
+    enable = true;
+    credentialsFile = config.age.secrets.smb-credentials.path;
+  };
+};
+```
+
 | Key        | Required | Purpose                                                   |
 | ---------- | -------- | --------------------------------------------------------- |
 | `system`   | yes      | `x86_64-linux`, `aarch64-darwin`, etc.                    |
-| `features` | no       | Toggle features and set their options.                    |
+| `features` | no       | Toggle features and set their options. Attrset, or a `{ config, ... }:` function for config-derived values (e.g. secret paths). |
 | `nixos`    | no       | Host-specific NixOS config. Ignored on darwin hosts.      |
 | `darwin`   | no       | Host-specific nix-darwin config. Ignored on NixOS hosts.  |
 | `home`     | no       | Host-specific home-manager config.                        |
@@ -209,11 +221,68 @@ globals = { config, ... }: {
 };
 ```
 
+## Secrets
+
+Secrets use [agenix](https://github.com/ryantm/agenix). Encrypted `*.age` files
+live in `secrets/`; recipients are declared in `secrets/secrets.nix`. Each host
+imports the agenix module and declares its secrets under `age.secrets.<name>`,
+which decrypt to `/run/agenix/<name>` at boot.
+
+A new secret touches three places:
+
+1. **`secrets/secrets.nix`** — declare who can decrypt it:
+
+   ```nix
+   "wg-1.conf.age".publicKeys = [ db orcshed ];
+   ```
+
+2. **The host's `nixos` block** (e.g. `hosts/orcshed.nix`) — declare the secret
+   so agenix decrypts it on that host:
+
+   ```nix
+   age.secrets."wg-1.conf" = {
+     file = ../secrets/wg-1.conf.age;
+     owner = "root";
+     group = "root";
+     mode = "0600";
+   };
+   ```
+
+3. **Where it's used** — pass the runtime path (never the `.age` file) to the
+   consumer. Options needing `config` go in the `features` function block:
+
+   ```nix
+   features = { config, ... }: {
+     nixarr.wgConf = config.age.secrets."wg-1.conf".path;
+   };
+   ```
+
+Then encrypt the file itself with the commands below.
+
+Run the commands from `secrets/` (agenix reads `./secrets.nix`) via the flake
+app — no local install needed. `-i` points at your age private key.
+
+Edit or create a secret (a new one needs its entry in `secrets.nix` first):
+
+```bash
+cd secrets
+nix run github:ryantm/agenix -- -e wg-1.conf.age -i ~/.config/age/keys.txt
+```
+
+Re-key all secrets after changing recipients in `secrets.nix`:
+
+```bash
+cd secrets
+nix run github:ryantm/agenix -- -r -i ~/.config/age/keys.txt
+```
+
 ## Adding things
 
 - **A new host** — drop a file in `hosts/`. Filename = host name.
 - **A new feature** — drop a file in `features/<wherever>/<name>.nix`. Folder
   structure is purely organizational; discovery is recursive.
+- **A new secret** — add a `<name>.age` entry to `secrets/secrets.nix`, create
+  it with `agenix -e`, then declare `age.secrets.<name>` on the host that needs it.
 - **Platform-specific behavior on an existing feature** — add or extend its
   `nixos = …`, `darwin = …`, or `home = …` block.
 
