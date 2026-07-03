@@ -1,9 +1,12 @@
 {
   system = "x86_64-linux";
 
-  features = {
+  features = { config, ... }: {
     zsh.enable = true;
-    nas.enable = true;
+    nas = {
+      enable = true;
+      credentialsFile = config.age.secrets.smb-credentials.path;
+    };
 
     ssh = {
       enable = true;
@@ -34,6 +37,12 @@
       openFirewall = false;
       mediaGroups = [ "users" ];
     };
+
+    nixarr = {
+      enable = true;
+      transmission = true;
+      wgConf = config.age.secrets."wg-1.conf".path;
+    };
   };
 
   nixos = { config, inputs, pkgs, ... }: {
@@ -43,14 +52,33 @@
       inputs.agenix.nixosModules.default
     ];
 
-    age.secrets.smb-credentials = {
-      file = ../secrets/smb-credentials.age;
-      owner = "root";
-      group = "root";
-      mode = "0600";
+    age.secrets = {
+      smb-credentials = {
+        file = ../secrets/smb-credentials.age;
+        owner = "root";
+        group = "root";
+        mode = "0600";
+      };
+      "wg-1.conf" = {
+        file = ../secrets/wg-1.conf.age;
+        owner = "root";
+        group = "root";
+        mode = "0600";
+      };
+      "wg-2.conf" = {
+        file = ../secrets/wg-2.conf.age;
+        owner = "root";
+        group = "root";
+        mode = "0600";
+      };
+      "wg-3.conf" = {
+        file = ../secrets/wg-3.conf.age;
+        owner = "root";
+        group = "root";
+        mode = "0600";
+      };
     };
 
-    features.nas.credentialsFile = config.age.secrets.smb-credentials.path;
 
     networking.hostName = "orcshed";
 
