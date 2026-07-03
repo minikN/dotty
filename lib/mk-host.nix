@@ -22,7 +22,6 @@ let
 
   user = globals.user;
 
-  ## Shared by system + home-manager: globals, host feature toggles, options.
   globalsOptionsModule = import ./globals-options.nix;
 
   staticGlobalsModule = { ... }: {
@@ -30,8 +29,9 @@ let
     config.globals.platform = platform;
   };
 
-  hostFeaturesModule = { ... }: {
-    config.features = hostFeatures;
+  hostFeaturesModule = args: {
+    config.features =
+      if builtins.isFunction hostFeatures then hostFeatures args else hostFeatures;
   };
 
   filterNonNull = builtins.filter (m: m != null);
