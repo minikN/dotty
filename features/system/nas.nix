@@ -38,19 +38,29 @@ mkFeature {
   nixos = { config, pkgs, ... }:
     let
       cfg = config.features.nas;
-      automountOpts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-      mountOpts = [
-        "${automountOpts},credentials=${toString cfg.credentialsFile},uid=1000,gid=100,file_mode=0664,dir_mode=0775"
-      ];
+      cifsOptions = "credentials=${toString cfg.credentialsFile},uid=1000,gid=100,file_mode=0664,dir_mode=0775";
     in
     {
       environment.systemPackages = [ pkgs.cifs-utils ];
+      system.fsPackages = [ pkgs.cifs-utils ];
 
-      fileSystems = lib.mapAttrs'
-        (mount: remote: lib.nameValuePair "${cfg.mountBase}/${mount}" {
-          device = "//${cfg.host}/${remote}";
-          fsType = "cifs";
-          options = mountOpts;
+      systemd.mounts = lib.mapAttrsToList
+        (mount: remote: {
+          what = "//${cfg.host}/${remote}";
+          where = "${cfg.mountBase}/${mount}";
+          type = "cifs";
+          options = cifsOptions;
+          after = [ "network-online.target" ];
+          wants = [ "network-online.target" ];
+          mountConfig.TimeoutSec = 45;
+          unitConfig.StartLimitIntervalSec = 0;
+        })
+        cfg.shares;
+
+      systemd.automounts = lib.mapAttrsToList
+        (mount: _remote: {
+          where = "${cfg.mountBase}/${mount}";
+          wantedBy = [ "multi-user.target" ];
         })
         cfg.shares;
     };
