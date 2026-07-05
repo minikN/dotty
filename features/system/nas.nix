@@ -40,7 +40,7 @@ mkFeature {
       cfg = config.features.nas;
       automountOpts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
       mountOpts = [
-        "${automountOpts},credentials=${toString cfg.credentialsFile},uid=1000,gid=100"
+        "${automountOpts},credentials=${toString cfg.credentialsFile},uid=1000,gid=100,file_mode=0664,dir_mode=0775"
       ];
     in
     {
