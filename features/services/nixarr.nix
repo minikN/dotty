@@ -36,6 +36,17 @@ mkFeature {
   nixos = { config, inputs, ... }:
     let
       cfg = config.features.nixarr;
+      sabnzbdClient = {
+        name = "SABnzbd";
+        implementation = "Sabnzbd";
+        enable = true;
+        fields = {
+          host = "localhost";
+          port = config.nixarr.sabnzbd.guiPort;
+          useSsl = false;
+          apiKey.secret = config.age.secrets."sabnzbd-api-key".path;
+        };
+      };
     in
     {
       imports = [ inputs.nixarr.nixosModules.default ];
@@ -70,11 +81,13 @@ mkFeature {
         sonarr = {
           enable = cfg.sonarr;
           openFirewall = cfg.openFirewall;
+          settings-sync.downloadClients = [ sabnzbdClient ];
         };
 
         radarr = {
           enable = cfg.radarr;
           openFirewall = cfg.openFirewall;
+          settings-sync.downloadClients = [ sabnzbdClient ];
         };
       };
 
