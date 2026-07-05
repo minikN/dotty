@@ -15,12 +15,21 @@ mkFeature {
     };
 
     vpnTestService = mkEnableOption "the VPN test service (logs public IP + DNS-leak test to `journalctl -u vpn-test-service`)";
-    transmission = mkEnableOption "the Transmission download client, confined to the VPN";
+    sabnzbd = mkEnableOption "the SABnzbd Usenet download client, confined to the VPN";
+    prowlarr = mkEnableOption "Prowlarr (indexer manager)";
+    sonarr = mkEnableOption "Sonarr (TV series management)";
+    radarr = mkEnableOption "Radarr (movie management)";
 
-    peerPort = mkOption {
-      type = types.port;
-      default = 50000;
-      description = "Transmission peer port. Set to the port your VPN provider forwards to you.";
+    openFirewall = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Open enabled services' web-UI ports for LAN access.";
+    };
+
+    mediaGroups = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      description = "Extra groups for the Sonarr/Radarr users (e.g. \"users\" for write access to NAS libraries).";
     };
   };
 
@@ -32,26 +41,48 @@ mkFeature {
       imports = [ inputs.nixarr.nixosModules.default ];
 
       assertions = [{
-        assertion = cfg.wgConf != null;
-        message = "features.nixarr.wgConf must be set when the feature is enabled.";
+        assertion = cfg.sabnzbd -> cfg.wgConf != null;
+        message = "features.nixarr.wgConf must be set when sabnzbd is enabled (it runs in the VPN namespace).";
       }];
 
       nixarr = {
         enable = true;
 
         vpn = {
-          enable = true;
+          enable = cfg.sabnzbd;
           wgConf = cfg.wgConf;
           vpnTestService.enable = cfg.vpnTestService;
         };
 
-        ## To access transmission's web GUI. Use a ssh tunnel:
-        ## ssh -L 9091:localhost:9091 <user>@<host>
-        transmission = {
-          enable = cfg.transmission;
-          peerPort = cfg.peerPort;
-          vpn.enable = cfg.transmission;
+        sabnzbd = {
+          enable = cfg.sabnzbd;
+          vpn.enable = cfg.sabnzbd;
+          openFirewall = cfg.openFirewall;
+          whitelistHostnames = [ config.networking.hostName "localhost" ];
+        };
+
+        prowlarr = {
+          enable = cfg.prowlarr;
+          openFirewall = cfg.openFirewall;
+          settings-sync.enable-nixarr-apps = true;
+        };
+
+        sonarr = {
+          enable = cfg.sonarr;
+          openFirewall = cfg.openFirewall;
+        };
+
+        radarr = {
+          enable = cfg.radarr;
+          openFirewall = cfg.openFirewall;
         };
       };
+
+      services.prowlarr.settings.auth.required = "DisabledForLocalAddresses";
+      services.radarr.settings.auth.required = "DisabledForLocalAddresses";
+      services.sonarr.settings.auth.required = "DisabledForLocalAddresses";
+
+      users.users.sonarr.extraGroups = lib.mkIf cfg.sonarr cfg.mediaGroups;
+      users.users.radarr.extraGroups = lib.mkIf cfg.radarr cfg.mediaGroups;
     };
 }
