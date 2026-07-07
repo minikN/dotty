@@ -38,7 +38,7 @@ mkFeature {
       keychainInteraction = mkOption {
         type = types.bool;
         default = true;
-        description = "darwin: pinentry-mac may save passphrases to the Keychain.";
+        description = "Whether to offer to save the password in the system keychain (darwin only).";
       };
     };
 
@@ -66,21 +66,10 @@ mkFeature {
       }
 
       (lib.mkIf (config.globals.platform == "darwin") {
-        ## pinentry-mac reads its keychain pref from macOS defaults.
-        launchd.agents.pinentry-keychainIntegration = {
-          enable = true;
-          config = {
-            Label = "org.dotty.pinentry-keychainIntegration";
-            RunAtLoad = true;
-            ProgramArguments = [
-              (pkgs.writeShellScript "pinentry-keychainIntegration" ''
-                export PATH="/bin:/usr/bin:/usr/local/bin"
-                defaults write org.gpgtools.pinentry-mac UseKeychain -bool ${if cfg.keychainInteraction then "YES" else "NO"}
-                defaults write org.gpgtools.pinentry-mac DisableKeychain -bool ${if cfg.keychainInteraction then "NO" else "YES"}
-              '').outPath
-            ];
-          };
-        };
+        home.activation.pinentryKeychain = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          $DRY_RUN_CMD /usr/bin/defaults write org.gpgtools.pinentry-mac UseKeychain -bool ${if cfg.keychainInteraction then "YES" else "NO"}
+          $DRY_RUN_CMD /usr/bin/defaults write org.gpgtools.pinentry-mac DisableKeychain -bool ${if cfg.keychainInteraction then "NO" else "YES"}
+        '';
       })
     ];
 }
