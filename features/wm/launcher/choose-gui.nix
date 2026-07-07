@@ -35,7 +35,7 @@ mkFeature {
         in
         "${cfg.package}/bin/choose"
         + " -f ${lib.escapeShellArg mono.name}"
-        + " -s ${toString mono.size * 1.5}"
+        + " -s ${toString (mono.size * 1.5)}"
         + " -c ${scheme.base0D}"
         + " -b ${scheme.base02}";
 
