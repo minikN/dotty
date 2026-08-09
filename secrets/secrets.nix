@@ -5,9 +5,10 @@ let
 
   ## ssh <host> 'cat /etc/ssh/ssh_host_ed25519_key.pub' to add a host.
   orcshed = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINjLXu5aJP+653XFeGVZLXluJtT+B+RYUpULJq9Jt6gx";
+  skynet = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID4DrpTVih0Jo+SV+l5ivwrN6RviQ2rKAlSDkggztfe4";
 in
 {
-  "smb-credentials.age".publicKeys = [ db orcshed ];
+  "smb-credentials.age".publicKeys = [ db orcshed skynet ];
   "sabnzbd-creds.age".publicKeys = [ db orcshed ];
   "prowlarr-indexer-key.age".publicKeys = [ db orcshed ];
   "sabnzbd-api-key.age".publicKeys = [ db orcshed ];
