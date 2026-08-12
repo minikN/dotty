@@ -13,6 +13,12 @@ mkFeature {
       defaultText = lib.literalExpression "ghostty-bin on darwin, ghostty on linux";
       description = "Ghostty package for the current platform.";
     };
+    settings = lib.mkOption {
+      type = lib.types.attrs;
+      default = { };
+      example = { font-size = 14; cursor-style = "bar"; };
+      description = "Extra settings merged into `programs.ghostty.settings` (override defaults).";
+    };
   };
 
   globals = { config, ... }: {
@@ -51,8 +57,10 @@ mkFeature {
           font-family-bold-italic = mono.name;
           font-style-bold-italic = "Bold Italic";
 
+          shell-integration-features = "ssh-env,ssh-terminfo";
+
           font-size = mono.size;
-        };
+        } // config.features.ghostty.settings;
 
         themes.dotty = with hex; {
           background = base00;
