@@ -18,6 +18,10 @@
       enable = true;
       extraConfig = ''
         export PATH="/opt/homebrew/bin:$PATH"
+        export PATH="/opt/homebrew/opt/ruby@3.4/bin:$PATH"
+        export LDFLAGS="-L/opt/homebrew/opt/ruby@3.4/lib"
+        export CPPFLAGS="-I/opt/homebrew/opt/ruby@3.4/include"
+        export PKG_CONFIG_PATH="/opt/homebrew/opt/ruby@3.4/lib/pkgconfig"
       '';
     };
   };
