@@ -16,6 +16,21 @@
       };
       authorizedKeyFiles = [ ../keys/db.pub ];
     };
+
+    llama-cpp = {
+      enable = true;
+      backend = "vulkan";        # RX 6650 XT (gfx1032) via Mesa RADV
+      openFirewall = true;
+      models.qwen = {
+        hfRepo = "unsloth/Qwen3.5-35B-A3B-GGUF";
+        quant = "Q4_K_M";
+
+        host = "0.0.0.0";        # reachable on the LAN
+        port = 8080;
+        settings = {
+        };
+      };
+    };
   };
 
   nixos = { config, inputs, pkgs, ... }:
@@ -45,6 +60,11 @@
       "usbhid"
       "usb_storage"
       "sd_mod"
+    ];
+
+    environment.systemPackages = [
+      config.features.llama-cpp.package
+      pkgs.radeontop
     ];
 
     hardware = {
