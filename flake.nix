@@ -25,6 +25,11 @@
       url = "github:nix-media-server/nixarr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    zmk-nix = {
+      url = "github:lilyinstarlight/zmk-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs:
