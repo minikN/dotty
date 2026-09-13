@@ -7,6 +7,7 @@
     aerospace.enable = true;
     choose-gui.enable = true;
     ghostty.enable = true;
+    zmk.enable = true;
     ssh.enable = true;
     password-store.enable = true;
     gnupg = {
