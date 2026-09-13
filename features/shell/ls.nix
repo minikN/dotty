@@ -6,7 +6,6 @@ mkFeature {
   home = { config, lib, pkgs, ... }:
     let
       isDarwin = config.globals.platform == "darwin";
-      ## Use GNU ls (gls) on darwin; BSD ls can't group-directories-first.
       binary = if isDarwin then "gls" else "ls";
     in
     {
