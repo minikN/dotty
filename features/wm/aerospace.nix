@@ -101,10 +101,11 @@ mkFeature {
                 "${modifier}-shift-${up}" = "move up";
                 "${modifier}-shift-${right}" = "move right";
 
-                "${modifier}-shift-l" = "join-with right";
-                "${modifier}-shift-h" = "join-with left";
-                "${modifier}-shift-j" = "join-with down";
-                "${modifier}-shift-k" = "join-with up";
+                "${modifier}-ctrl-${left}" = "join-with right";
+                "${modifier}-ctrl-${down}" = "join-with left";
+                "${modifier}-ctrl-${up}" = "join-with down";
+                "${modifier}-ctrl-${right}" = "join-with up";
+
                 "${modifier}-shift-f" = "fullscreen";
 
                 "${modifier}-s" = "layout tiles horizontal vertical";
@@ -113,27 +114,27 @@ mkFeature {
 
                 "${modifier}-r" = "mode resize";
 
-                "${modifier}-1" = "workspace 1";
-                "${modifier}-2" = "workspace 2";
-                "${modifier}-3" = "workspace 3";
-                "${modifier}-4" = "workspace 4";
-                "${modifier}-5" = "workspace 5";
-                "${modifier}-6" = "workspace 6";
-                "${modifier}-7" = "workspace 7";
-                "${modifier}-8" = "workspace 8";
-                "${modifier}-9" = "workspace 9";
-                "${modifier}-0" = "workspace 10";
+                "${modifier}-keypad1" = "workspace 1";
+                "${modifier}-keypad2" = "workspace 2";
+                "${modifier}-keypad3" = "workspace 3";
+                "${modifier}-keypad4" = "workspace 4";
+                "${modifier}-keypad5" = "workspace 5";
+                "${modifier}-keypad6" = "workspace 6";
+                "${modifier}-keypad7" = "workspace 7";
+                "${modifier}-keypad8" = "workspace 8";
+                "${modifier}-keypad9" = "workspace 9";
+                "${modifier}-keypad0" = "workspace 10";
 
-                "${modifier}-shift-1" = "move-node-to-workspace 1";
-                "${modifier}-shift-2" = "move-node-to-workspace 2";
-                "${modifier}-shift-3" = "move-node-to-workspace 3";
-                "${modifier}-shift-4" = "move-node-to-workspace 4";
-                "${modifier}-shift-5" = "move-node-to-workspace 5";
-                "${modifier}-shift-6" = "move-node-to-workspace 6";
-                "${modifier}-shift-7" = "move-node-to-workspace 7";
-                "${modifier}-shift-8" = "move-node-to-workspace 8";
-                "${modifier}-shift-9" = "move-node-to-workspace 9";
-                "${modifier}-shift-0" = "move-node-to-workspace 0";
+                "${modifier}-shift-keypad1" = "move-node-to-workspace 1";
+                "${modifier}-shift-keypad2" = "move-node-to-workspace 2";
+                "${modifier}-shift-keypad3" = "move-node-to-workspace 3";
+                "${modifier}-shift-keypad4" = "move-node-to-workspace 4";
+                "${modifier}-shift-keypad5" = "move-node-to-workspace 5";
+                "${modifier}-shift-keypad6" = "move-node-to-workspace 6";
+                "${modifier}-shift-keypad7" = "move-node-to-workspace 7";
+                "${modifier}-shift-keypad8" = "move-node-to-workspace 8";
+                "${modifier}-shift-keypad9" = "move-node-to-workspace 9";
+                "${modifier}-shift-keypad0" = "move-node-to-workspace 0";
 
                 "${modifier}-shift-c" = "reload-config";
               }
