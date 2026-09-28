@@ -1,9 +1,5 @@
 { lib, mkFeature, ... }:
 
-## Custom ZMK firmware for the wireless Corne (nice!nano v2 + nice!view),
-## built with zmk-nix. Customise keys in ./config/corne.{keymap,conf} or live
-## over USB with ZMK Studio. Installs the Studio app plus a `corne-flash`
-## helper that writes the freshly built firmware onto each half.
 mkFeature {
   name = "zmk";
 
@@ -21,11 +17,8 @@ mkFeature {
 
         board = "nice_nano@2.0.0//zmk";
         shield = "corne_%PART% nice_view_adapter nice_view";
-        enableZmkStudio = true;
 
-        ## The West deps are pinned by config/west.yml, so this hash tracks that
-        ## manifest (identical to the one zmk-nix ships). Bump config/west.yml and
-        ## `nix build` will print the corrected value on mismatch.
+        ## hash for config/west.yml
         zephyrDepsHash = "sha256-GvtT42CxvQfcEoVjlsT0gMNN0PWR/TiHmNab/My12Kg=";
 
         meta = {
@@ -35,10 +28,7 @@ mkFeature {
         };
       };
 
-      ## macOS flasher. The nice!nano bootloader mounts as a USB volume named
-      ## NICENANO; drop the matching half's .uf2 onto it. (zmk-nix's own flasher
-      ## is Linux-only — it relies on lsblk/udisks.)
-      flash = pkgs.writeShellApplication {
+      corne-flash = pkgs.writeShellApplication {
         name = "corne-flash";
         text = ''
           for part in ${toString firmware.parts}; do
@@ -53,8 +43,7 @@ mkFeature {
             done
 
             echo "Flashing $part onto $vol ..."
-            # The board reboots mid-copy, so a write error here is expected.
-            cp ${firmware}/zmk_"$part".uf2 "$vol"/ || true
+            cp -X ${firmware}/zmk_"$part".uf2 "$vol"/ || true
 
             echo "Done — waiting for the $part half to reboot ..."
             while [ -d "$vol" ]; do sleep 1; done
@@ -65,8 +54,7 @@ mkFeature {
     in
     {
       environment.systemPackages = [
-        pkgs.zmk-studio
-        flash
+        corne-flash
       ];
     };
 }
