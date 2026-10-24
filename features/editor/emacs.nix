@@ -32,6 +32,9 @@ mkFeature {
       inherit (config.features) font user;
       shell = config.globals.apps.shell;
       stateDir = "${config.xdg.stateHome}/emacs";
+      isDarwin = config.globals.platform == "darwin";
+      shellEnvVars = [ "PATH" "MANPATH" "SSH_AUTH_SOCK" "NIX_SSL_CERT_FILE" ]
+        ++ builtins.attrNames config.home.sessionVariables;
     in
     lib.mkMerge [
       {
@@ -46,7 +49,10 @@ mkFeature {
           client.enable = true;
         };
 
-        xdg.configFile."emacs/early-init.el".text = cfg.earlyInit;
+        xdg.configFile."emacs/early-init.el".text = ''
+          ;;; early-init.el -*- lexical-binding: t -*-
+          ${cfg.earlyInit}
+        '';
 
         ## Emacs won't create these itself; not done in elisp since the config
         ## is also loaded at build time (byte-compiling default.el).
@@ -58,7 +64,8 @@ mkFeature {
       (mkElispConfig pkgs {
         name = "dotty-emacs";
         summary = "Base Emacs configuration";
-        elispPackages = epkgs: [ epkgs.wgrep ];
+        elispPackages = epkgs: [ epkgs.wgrep ]
+          ++ lib.optional isDarwin epkgs.exec-path-from-shell;
 
         earlyInit = ''
           ;; Defer GC while starting up; restore a sane threshold afterwards.
@@ -148,6 +155,16 @@ mkFeature {
                 (set-fontset-font t 'emoji (font-spec :family "${font.fonts.unicode.name}"))))
             (dotty-emacs--set-emoji-font)
             (add-hook 'server-after-make-frame-hook #'dotty-emacs--set-emoji-font)
+          ''}
+          ${optionalString isDarwin ''
+            (require 'exec-path-from-shell)
+            ${optionalString (shell != null) ''
+              (setopt exec-path-from-shell-shell-name "${shell}")
+            ''}
+            (setopt exec-path-from-shell-variables
+                    '(${lib.concatMapStringsSep " " (v: ''"${v}"'') shellEnvVars}))
+            (unless noninteractive
+              (exec-path-from-shell-initialize))
           ''}
         '';
       })
