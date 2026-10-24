@@ -6,9 +6,12 @@
     theme.enable = true;
     aerospace.enable = true;
     choose-gui.enable = true;
+
     emacs.enable = true;
     emacs.window-management.enable = true;
     emacs.completion.enable = true;
+    emacs.keymaps.enable = true;
+
     ghostty.enable = true;
     zmk.enable = true;
     ssh.enable = true;
