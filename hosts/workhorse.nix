@@ -6,6 +6,7 @@
     theme.enable = true;
     aerospace.enable = true;
     choose-gui.enable = true;
+    emacs.enable = true;
     ghostty.enable = true;
     zmk.enable = true;
     ssh.enable = true;
