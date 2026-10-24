@@ -101,10 +101,10 @@ mkFeature {
                 "${modifier}-shift-${up}" = "move up";
                 "${modifier}-shift-${right}" = "move right";
 
-                "${modifier}-ctrl-${left}" = "join-with right";
-                "${modifier}-ctrl-${down}" = "join-with left";
-                "${modifier}-ctrl-${up}" = "join-with down";
-                "${modifier}-ctrl-${right}" = "join-with up";
+                "${modifier}-ctrl-${left}" = "join-with left";
+                "${modifier}-ctrl-${down}" = "join-with down";
+                "${modifier}-ctrl-${up}" = "join-with up";
+                "${modifier}-ctrl-${right}" = "join-with right";
 
                 "${modifier}-shift-f" = "fullscreen";
 
@@ -123,7 +123,7 @@ mkFeature {
                 "${modifier}-keypad7" = "workspace 7";
                 "${modifier}-keypad8" = "workspace 8";
                 "${modifier}-keypad9" = "workspace 9";
-                "${modifier}-keypad0" = "workspace 10";
+                "${modifier}-keypad0" = "workspace 0";
 
                 "${modifier}-shift-keypad1" = "move-node-to-workspace 1";
                 "${modifier}-shift-keypad2" = "move-node-to-workspace 2";
