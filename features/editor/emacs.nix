@@ -95,6 +95,11 @@ mkFeature {
         '';
 
         config = ''
+          (defgroup dotty nil
+            "Dotty Emacs configuration."
+            :group 'external
+            :prefix "dotty-")
+
           (setq user-full-name "${user.fullName}"
                 user-mail-address "${user.email}")
 
