@@ -1,0 +1,156 @@
+#+title: Dotty Window Management
+#+subtitle: Predictable buffer display in side windows
+#+author: Demis Balbach
+#+language: en
+#+texinfo_filename: dotty-window-management.info
+#+texinfo_dir_category: Dotty
+#+texinfo_dir_name: Dotty Window Management: (dotty-window-management).
+#+texinfo_dir_desc: Predictable buffer display in side windows
+
+Where Emacs shows a buffer depends on whoever displays it: some commands
+reuse the selected window, some split it, others pick the least recently
+used one. This package removes the guesswork. It assigns buffers to a
+configurable set of /side windows/, and every buffer that belongs to one
+always appears there.
+
+It adds nothing new to Emacs' window machinery. It only writes rules
+for =display-buffer-alist= that use Emacs' own side windows (see
+[[info:elisp#Side Windows]]), plus a few commands to work with them.
+
+* Layout
+
+By default there are four side windows. The left and right windows span
+the full height of the frame; the two bottom windows sit between them.
+
+| Window         | Side   | Slot | Size | Houses                                  |
+|----------------+--------+------+------+-----------------------------------------|
+| =left=         | left   |    0 |  20% | Nothing yet; meant for file/tree lists  |
+| =right=        | right  |    0 |  30% | Documentation and help                  |
+| =bottom-left=  | bottom |   -1 |  30% | Shells, terminals and REPLs             |
+| =bottom-right= | bottom |    1 |  30% | Compilation and grep results            |
+
+Windows on the same side are ordered by their /slot/: negative slots come
+first (left or above), positive ones last. The size is a fraction of the
+frame's width (left and right) or height (top and bottom).
+
+Everything about the layout is configurable: windows can be changed,
+removed or added (see [[*Customization]] and [[*Nix configuration]]).
+
+* How buffers are placed
+
+Each side window houses a list of buffers, given as buffer-name regexps
+or major modes. A major mode also matches every mode derived from it, so
+=comint-mode= covers =M-x shell=, =M-x ielm= and other REPLs alike.
+
+- Side window rules :: Each window becomes one =display-buffer-alist=
+  entry. A buffer that belongs to a window is always shown in it. When
+  windows overlap, the first one in =dotty-window-management-windows=
+  wins.
+
+- The main window rule :: When a command wants to show a buffer /in the
+  selected window/ (=C-x b=, =find-file=, =RET= in Dired, ...) while a side
+  window is selected, the buffer goes to the most recently used window of
+  the main area instead. Opening a file from a shell or help buffer
+  therefore never replaces that buffer in its side window.
+
+- =switch-to-buffer= :: Normally =switch-to-buffer= ignores
+  =display-buffer-alist=. The Nix feature sets
+  =switch-to-buffer-obey-display-actions=, so =C-x b= obeys the rules too.
+
+The rules are only bypassed by code that sets a window's buffer directly
+with =set-window-buffer=, which skips Emacs' display machinery entirely.
+
+* Commands
+
+No keys are bound by default. Each command reads the window name with
+completion, defaulting to the selected side window.
+
+- Command: dotty-window-management-cycle name ::
+  Show the next buffer belonging to side window NAME, in alphabetical
+  order. If the window is hidden, show it.
+
+- Command: dotty-window-management-toggle name ::
+  Show side window NAME if it is hidden, hide it otherwise. It shows the
+  buffer that was used most recently.
+
+- Command: dotty-window-management-toggle-all ::
+  Hide all side windows if at least one is shown, otherwise show all of
+  them. Windows without buffers stay hidden.
+
+- Command: dotty-window-management-focus name ::
+  Hide all other side windows and show NAME at
+  =dotty-window-management-focus-size=. Call it again to restore the
+  previous layout.
+
+- Command: dotty-window-management-fullscreen name ::
+  Hide all windows and show the buffer of side window NAME as the only
+  window. Call it again to restore the previous layout.
+
+For every configured window there are also commands without a prompt,
+named =dotty-window-management-NAME-COMMAND=, for example
+=dotty-window-management-left-toggle=. They are convenient for key
+bindings:
+
+#+begin_src emacs-lisp
+(keymap-global-set "C-c w l" #'dotty-window-management-left-toggle)
+(keymap-global-set "C-c w s" #'dotty-window-management-bottom-left-cycle)
+#+end_src
+
+* Customization
+
+Run =M-x customize-group RET dotty-window-management= to change the
+options below. Their defaults come from the Nix configuration; values
+saved with Customize take precedence, and /Erase Customization/ returns to
+the Nix defaults.
+
+- Command: dotty-window-management-mode ::
+  Global minor mode that installs the rules. It is enabled by the Nix
+  feature.
+
+- User Option: dotty-window-management-windows ::
+  The side windows. Each element is =(NAME . PLIST)=, with these keys:
+  - =:side= :: =left=, =right=, =top= or =bottom=.
+  - =:slot= :: Position among windows on the same side.
+  - =:size= :: A fraction of the frame, or a number of columns or lines.
+  - =:buffers= :: Strings are buffer-name regexps, symbols major modes.
+
+  #+begin_src emacs-lisp
+  (bottom-left :side bottom :slot -1 :size 0.3
+               :buffers (comint-mode eshell-mode term-mode))
+  #+end_src
+
+- User Option: dotty-window-management-focus-size ::
+  Size of a focused side window, as a fraction of the frame. The default
+  is 0.5.
+
+* Nix configuration
+
+The feature is enabled with ~features.emacs.window-management.enable =
+true;~. Its options seed the defaults of the Customize options above:
+
+- ~windows.<name>.side~, ~slot~, ~size~ :: The window's position and size.
+- ~windows.<name>.names~ :: Buffer-name regexps.
+- ~windows.<name>.modes~ :: Major mode names.
+- ~windows.<name>.enable~ :: Set to ~false~ to remove a window.
+- ~focusSize~ :: Default of =dotty-window-management-focus-size=.
+
+Other features claim their buffers by adding to these lists from their
+~home~ block. Nothing happens if the window management feature is off:
+
+#+begin_src nix
+features.emacs.window-management.windows.bottom-right.modes = [ "magit-process-mode" ];
+#+end_src
+
+A host can reshape the layout, for example dropping a window and adding
+a top one:
+
+#+begin_src nix
+features.emacs.window-management.windows = {
+  bottom-right.enable = false;
+  top = {
+    side = "top";
+    size = 0.25;
+    names = [ "\\`\\*Messages\\*" ];
+  };
+};
+#+end_src
