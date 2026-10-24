@@ -103,7 +103,6 @@ mkFeature {
           (setq user-full-name "${user.fullName}"
                 user-mail-address "${user.email}")
 
-          ;; Persistent state goes to XDG_STATE_HOME, not the config dir.
           (setopt custom-file "${stateDir}/custom.el")
           (load custom-file t)
           (setopt backup-directory-alist '(("." . "${stateDir}/backup"))
@@ -114,6 +113,8 @@ mkFeature {
                   auto-save-list-file-prefix "${stateDir}/auto-save/.saves-")
           (setq auto-save-file-name-transforms '((".*" "${stateDir}/auto-save/" t))
                 lock-file-name-transforms '((".*" "${stateDir}/lock/" t)))
+
+          (setopt which-key-min-display-lines 5)
 
           (save-place-mode 1)
           (recentf-mode 1)
