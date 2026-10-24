@@ -57,8 +57,9 @@ mkFeature {
     {
       programs.home-manager.enable = true;
 
-      home.sessionVariables.EDITOR =
-        mkIf (config.globals.apps.editor != null) config.globals.apps.editor;
+      home.sessionVariables = lib.optionalAttrs (config.globals.apps.editor != null) {
+        EDITOR = config.globals.apps.editor;
+      };
     }
     (mkIf (config.globals.platform == "darwin") {
       targets.darwin = {
