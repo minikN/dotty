@@ -1,10 +1,10 @@
-#+title: Dotty Window Management
+#+title: Window Management
 #+subtitle: Predictable buffer display in side windows
 #+author: Demis Balbach
 #+language: en
 #+texinfo_filename: dotty-window-management.info
 #+texinfo_dir_category: Dotty
-#+texinfo_dir_name: Dotty Window Management: (dotty-window-management).
+#+texinfo_dir_name: Window Management: (dotty-window-management).
 #+texinfo_dir_desc: Predictable buffer display in side windows
 
 Where Emacs shows a buffer depends on whoever displays it: some commands
@@ -60,10 +60,28 @@ or major modes. A major mode also matches every mode derived from it, so
 The rules are only bypassed by code that sets a window's buffer directly
 with =set-window-buffer=, which skips Emacs' display machinery entirely.
 
+* Keys
+
+With the keymaps feature enabled, the commands live under =C-c w=. Each
+window has a key; by default they follow the windows' positions on
+screen from left to right: =h= left, =j= bottom left, =k= bottom right,
+=l= right.
+
+| Keys            | Command                                         |
+|-----------------+-------------------------------------------------|
+| =C-c w h=       | Toggle the left window (likewise =j=, =k=, =l=) |
+| =C-c w w=       | Toggle all side windows                         |
+| =C-c w c h=     | Cycle the left window's buffers                 |
+| =C-c w f h=     | Focus the left window                           |
+| =C-c w F h=     | Show the left window's buffer in fullscreen     |
+
+After =C-c w c h=, keep pressing =h= (or another window's key) to cycle
+further; =repeat-mode= keeps the cycle keys active.
+
 * Commands
 
-No keys are bound by default. Each command reads the window name with
-completion, defaulting to the selected side window.
+Each command reads the window name with completion, defaulting to the
+selected side window.
 
 - Command: dotty-window-management-cycle name ::
   Show the next buffer belonging to side window NAME, in alphabetical
@@ -88,13 +106,7 @@ completion, defaulting to the selected side window.
 
 For every configured window there are also commands without a prompt,
 named =dotty-window-management-NAME-COMMAND=, for example
-=dotty-window-management-left-toggle=. They are convenient for key
-bindings:
-
-#+begin_src emacs-lisp
-(keymap-global-set "C-c w l" #'dotty-window-management-left-toggle)
-(keymap-global-set "C-c w s" #'dotty-window-management-bottom-left-cycle)
-#+end_src
+=dotty-window-management-left-toggle=. The keys above run these.
 
 * Customization
 
@@ -113,9 +125,10 @@ the Nix defaults.
   - =:slot= :: Position among windows on the same side.
   - =:size= :: A fraction of the frame, or a number of columns or lines.
   - =:buffers= :: Strings are buffer-name regexps, symbols major modes.
+  - =:key= :: The window's key in =dotty-window-management-map=.
 
   #+begin_src emacs-lisp
-  (bottom-left :side bottom :slot -1 :size 0.3
+  (bottom-left :side bottom :slot -1 :size 0.3 :key "j"
                :buffers (comint-mode eshell-mode term-mode))
   #+end_src
 
@@ -131,8 +144,10 @@ true;~. Its options seed the defaults of the Customize options above:
 - ~windows.<name>.side~, ~slot~, ~size~ :: The window's position and size.
 - ~windows.<name>.names~ :: Buffer-name regexps.
 - ~windows.<name>.modes~ :: Major mode names.
+- ~windows.<name>.key~ :: The window's key.
 - ~windows.<name>.enable~ :: Set to ~false~ to remove a window.
 - ~focusSize~ :: Default of =dotty-window-management-focus-size=.
+- ~key~ :: The key under =C-c= for the window commands, =w= by default.
 
 Other features claim their buffers by adding to these lists from their
 ~home~ block. Nothing happens if the window management feature is off:

@@ -33,6 +33,11 @@ let
         default = [ ];
         description = "Major modes; modes derived from them match too.";
       };
+      key = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Key selecting this window in `dotty-window-management-map`.";
+      };
     };
   };
 in
@@ -50,6 +55,11 @@ mkFeature {
       default = 0.5;
       description = "Default of `dotty-window-management-focus-size`.";
     };
+    key = mkOption {
+      type = types.str;
+      default = "w";
+      description = "Key under `C-c` for `dotty-window-management-map`.";
+    };
   };
 
   home = { config, lib, pkgs, ... }:
@@ -57,29 +67,34 @@ mkFeature {
       cfg = config.features.emacs.window-management;
       windows = lib.filterAttrs (_: w: w.enable) cfg.windows;
       toWindow = name: w: ''
-        (${name} :side ${w.side} :slot ${toString w.slot} :size ${toString w.size}
+        (${name} :side ${w.side} :slot ${toString w.slot} :size ${toString w.size}${
+          lib.optionalString (w.key != null) " :key ${builtins.toJSON w.key}"}
          :buffers (${lib.concatStringsSep " " (map builtins.toJSON w.names ++ w.modes)}))'';
     in
     lib.mkMerge [
       {
         features.emacs.window-management.windows = {
           left = {
+            key = mkDefault "h";
             side = mkDefault "left";
             size = mkDefault 0.2;
           };
           right = {
+            key = mkDefault "l";
             side = mkDefault "right";
             size = mkDefault 0.3;
             names = [ "\\`\\*eldoc" ];
             modes = [ "help-mode" "Info-mode" "Man-mode" "woman-mode" "apropos-mode" "shortdoc-mode" ];
           };
           bottom-left = {
+            key = mkDefault "j";
             side = mkDefault "bottom";
             slot = mkDefault (-1);
             size = mkDefault 0.3;
             modes = [ "comint-mode" "eshell-mode" "term-mode" ];
           };
           bottom-right = {
+            key = mkDefault "k";
             side = mkDefault "bottom";
             slot = mkDefault 1;
             size = mkDefault 0.3;
@@ -113,7 +128,8 @@ mkFeature {
             :size     Width (left/right) or height (top/bottom): a fraction
                       of the frame, or a number of columns/lines.
             :buffers  A string is a regexp matched against buffer names, a
-                      symbol a major mode (derived modes match too)."
+                      symbol a major mode (derived modes match too).
+            :key      Key selecting the window in `dotty-window-management-map'."
             :type '(alist :key-type (symbol :tag "Name")
                           :value-type
                           (plist :options
@@ -122,7 +138,8 @@ mkFeature {
                                   (:slot integer)
                                   (:size number)
                                   (:buffers (repeat (choice (regexp :tag "Buffer name")
-                                                            (symbol :tag "Major mode")))))))
+                                                            (symbol :tag "Major mode"))))
+                                  (:key key))))
             :set (lambda (symbol value)
                    (set-default-toplevel-value symbol value)
                    (when (bound-and-true-p dotty-window-management-mode)
@@ -132,6 +149,18 @@ mkFeature {
             "Size of a focused side window, as a fraction of the frame.
           Width for left and right windows, height for top and bottom ones."
             :type 'number)
+
+          (defvar-keymap dotty-window-management-map
+            :doc "Keymap of window commands; window keys come from each window's `:key'.")
+
+          (defvar-keymap dotty-window-management-cycle-map
+            :doc "Keymap cycling the buffers of the side window behind each key.")
+
+          (defvar-keymap dotty-window-management-focus-map
+            :doc "Keymap focusing the side window behind each key.")
+
+          (defvar-keymap dotty-window-management-fullscreen-map
+            :doc "Keymap showing the side window behind each key in fullscreen.")
 
           (defconst dotty-window-management--main-rule
             '(dotty-window-management--same-window-p
@@ -304,6 +333,27 @@ mkFeature {
                     (lambda () (interactive) (funcall fn name))
                     (format "Call `%s' on side window `%s'." fn name))))))
 
+          (defun dotty-window-management--define-keys ()
+            "Rebuild `dotty-window-management-map' from the windows' `:key'."
+            (let ((maps `((toggle . ,dotty-window-management-map)
+                          (cycle . ,dotty-window-management-cycle-map)
+                          (focus . ,dotty-window-management-focus-map)
+                          (fullscreen . ,dotty-window-management-fullscreen-map))))
+              (dolist (map maps) (setcdr (cdr map) nil))
+              (keymap-set dotty-window-management-map "w" #'dotty-window-management-toggle-all)
+              (keymap-set dotty-window-management-map "c" (cons "cycle" dotty-window-management-cycle-map))
+              (keymap-set dotty-window-management-map "f" (cons "focus" dotty-window-management-focus-map))
+              (keymap-set dotty-window-management-map "F" (cons "fullscreen" dotty-window-management-fullscreen-map))
+              (dolist (entry dotty-window-management-windows)
+                (when-let* ((key (plist-get (cdr entry) :key)))
+                  (pcase-dolist (`(,command . ,map) maps)
+                    (keymap-set map key
+                                (cons (symbol-name (car entry))
+                                      (intern (format "dotty-window-management-%s-%s"
+                                                      (car entry) command)))))
+                  (put (intern (format "dotty-window-management-%s-cycle" (car entry)))
+                       'repeat-map 'dotty-window-management-cycle-map)))))
+
           (defun dotty-window-management--uninstall ()
             "Remove the rules added by `dotty-window-management--install'."
             (setq display-buffer-alist
@@ -322,7 +372,8 @@ mkFeature {
                           (list dotty-window-management--main-rule))
                   display-buffer-alist
                   (append dotty-window-management--rules display-buffer-alist))
-            (dotty-window-management--define-commands))
+            (dotty-window-management--define-commands)
+            (dotty-window-management--define-keys))
 
           ;;;###autoload
           (define-minor-mode dotty-window-management-mode
@@ -339,6 +390,8 @@ mkFeature {
           (setopt window-sides-vertical t
                   switch-to-buffer-obey-display-actions t)
           (dotty-window-management-mode 1)
+          (with-eval-after-load 'dotty-keymaps
+            (keymap-set mode-specific-map "${cfg.key}" (cons "Windows" dotty-window-management-map)))
         '';
       }
     ];
