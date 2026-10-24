@@ -38,7 +38,9 @@
       flakeLib = import ./lib { inherit lib; };
 
       globals = import ./globals.nix;
-      features = flakeLib.discoverFeatures ./features flakeLib.mkFeature;
+      features = flakeLib.discoverFeatures ./features {
+        inherit (flakeLib) mkFeature mkElispConfig;
+      };
       hostEntries = flakeLib.discoverHosts ./hosts;
 
       builtHosts = builtins.listToAttrs (map

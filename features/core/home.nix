@@ -56,6 +56,9 @@ mkFeature {
   home = { config, pkgs, ... }: mkMerge [
     {
       programs.home-manager.enable = true;
+
+      home.sessionVariables.EDITOR =
+        mkIf (config.globals.apps.editor != null) config.globals.apps.editor;
     }
     (mkIf (config.globals.platform == "darwin") {
       targets.darwin = {
