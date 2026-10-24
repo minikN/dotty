@@ -1,0 +1,105 @@
+#+title: Keymaps
+#+subtitle: How dotty's Emacs features bind their keys
+#+author: Demis Balbach
+#+language: en
+#+texinfo_filename: dotty-keymaps.info
+#+texinfo_dir_category: Dotty
+#+texinfo_dir_name: Keymaps: (dotty-keymaps).
+#+texinfo_dir_desc: How dotty's Emacs features bind their keys
+
+Every dotty feature makes its commands available in the same few places,
+so you can guess where a key lives before looking it up. Dotty's own
+keys all start with =C-c= followed by a letter: the only key sequences
+Emacs reserves for users, so no major or minor mode ever shadows them.
+The super (command) key is left to the window manager.
+
+* Where keys live
+
+| Keys           | Purpose                               | Provided by            |
+|----------------+---------------------------------------+------------------------|
+| =C-c a=        | Applications                          | Keymaps                |
+| =C-c t=        | Toggles                               | Keymaps                |
+| =C-c w=        | Side windows                          | Window management      |
+| =M-g=          | Go to (Emacs' =goto-map=)             | Emacs, extended        |
+| =M-s=          | Search (Emacs' =search-map=)          | Emacs, extended        |
+| =C-x p=        | Project (=project-prefix-map=)        | Emacs                  |
+| =C-.=, =C-;=   | Act on the thing at point (Embark)    | Completion             |
+
+Commands that replace a built-in one keep its key. With the completion
+feature, for example, =C-x b= runs =consult-buffer= and =M-y= runs
+=consult-yank-pop=.
+
+* Finding keys
+
+- which-key :: Pause after typing a prefix such as =C-c= and a popup
+  lists what follows, with names like /Applications/ or /Windows/.
+- =C-h= after a prefix :: Lists the prefix's keys with completion.
+- =M-x describe-keymap= :: Shows a whole keymap, for example
+  =dotty-app-map=.
+
+Each feature's own manual documents its keys.
+
+* Toggles
+
+=C-c t= toggles modes. A lowercase key toggles a mode in the current
+buffer, the uppercase key its global variant.
+
+| Key       | Buffer-local                         | Global (uppercase)                           |
+|-----------+--------------------------------------+----------------------------------------------|
+| =f= / =F= | ~display-fill-column-indicator-mode~ | ~global-display-fill-column-indicator-mode~  |
+| =l= / =L= | ~display-line-numbers-mode~          | ~global-display-line-numbers-mode~           |
+| =r=       | ~read-only-mode~                     |                                              |
+| =v= / =V= | ~visual-line-mode~                   | ~global-visual-line-mode~                    |
+| =w= / =W= | ~whitespace-mode~                    | ~global-whitespace-mode~                     |
+
+* Rules for features
+
+These rules keep keys predictable as features are added.
+
+1. Built-ins first. A command that replaces a built-in one takes its key
+   through a remap. A command that fits an existing Emacs prefix map goes
+   there: =M-g= for going somewhere, =M-s= for searching, =C-x p= for
+   projects, =C-h= for help.
+2. Everything else goes under =C-c= and a letter. Each letter is a
+   domain: =a= applications, =t= toggles, =w= windows. A feature only gets
+   a letter of its own for a domain of its own; otherwise it takes one key
+   in =C-c a=, with a keymap of its own when it has several commands.
+3. No super keys; they belong to the window manager.
+4. Packages define keymaps but never bind them. The feature's
+   configuration does, inside ~(with-eval-after-load 'dotty-keymaps ...)~,
+   so nothing is bound when this feature is off.
+5. Keys are Nix options: ~key~ for a feature's single entry point,
+   ~keys.<name>~ when there are several.
+6. Every prefix has a label, shown by which-key.
+7. Verb first, then object, and repeatable where that is natural, using
+   =repeat-mode= instead of holding modifiers.
+8. Keys recommended upstream stay where they don't fit =C-c=, such as
+   Embark's =C-.=.
+
+* Adding keys to a feature
+
+A feature with one entry point declares a ~key~ option and binds its
+command in the applications map:
+
+#+begin_src nix
+options.key = lib.mkOption {
+  type = lib.types.str;
+  default = "e";
+  description = "Key in `dotty-app-map`.";
+};
+
+home = { config, ... }: {
+  programs.emacs.extraConfig = ''
+    (with-eval-after-load 'dotty-keymaps
+      (keymap-set dotty-app-map "${config.features.emacs.foo.key}" #'foo))
+  '';
+};
+#+end_src
+
+A feature with several commands defines a keymap in its package and
+mounts it with a label, as window management does with =C-c w=:
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'dotty-keymaps
+  (keymap-set mode-specific-map "w" (cons "Windows" dotty-window-management-map)))
+#+end_src
