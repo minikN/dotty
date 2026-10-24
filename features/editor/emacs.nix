@@ -124,7 +124,8 @@ mkFeature {
                   require-final-newline t
                   what-cursor-show-names t
                   scroll-conservatively 100
-                  global-auto-revert-non-file-buffers t)
+                  global-auto-revert-non-file-buffers t
+                  use-short-answers t)
           (setq-default indent-tabs-mode nil)
           (global-subword-mode 1)
           (global-auto-revert-mode 1)
