@@ -23,6 +23,7 @@
     "darwin": {
       "inputs": {
         "nixpkgs": [
+          "tessera",
           "nixpkgs"
         ]
       },
@@ -44,6 +45,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
+          "tessera",
           "nixpkgs"
         ]
       },
@@ -86,7 +88,7 @@
     },
     "nixos-hardware": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "lastModified": 1792697326,
@@ -105,19 +107,6 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1789546076,
-        "narHash": "sha256-vWkSk5bbfTqdtMoSgD9FshACO8JCvXTFi+3cqEp0mH0=",
-        "rev": "b1b875982b17dabde9b4a37f3e229e74913e6db3",
-        "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1074753.b1b875982b17/nixexprs.tar.xz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
         "lastModified": 1792502884,
         "narHash": "sha256-IoNisKcGbUjdd45qCqywGMCYmZ5EnkxezvLII0FWwNA=",
         "owner": "nixos",
@@ -132,15 +121,49 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1789546076,
+        "narHash": "sha256-vWkSk5bbfTqdtMoSgD9FshACO8JCvXTFi+3cqEp0mH0=",
+        "rev": "b1b875982b17dabde9b4a37f3e229e74913e6db3",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1074753.b1b875982b17/nixexprs.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "nixarr": "nixarr",
+        "nixpkgs": "nixpkgs",
+        "tessera": "tessera",
+        "zmk-nix": "zmk-nix"
+      }
+    },
+    "tessera": {
+      "inputs": {
         "darwin": "darwin",
         "home-manager": "home-manager",
-        "nixarr": "nixarr",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_2",
-        "zmk-nix": "zmk-nix"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792933490,
+        "narHash": "sha256-EDzLaJYTKAydAKRu9iTb/3S5czrdydCefCkX/i2Mq7k=",
+        "ref": "refs/heads/main",
+        "rev": "b8c2cff668f911d72482c0fda109eda49070ca8e",
+        "revCount": 1,
+        "type": "git",
+        "url": "file:///Users/db/.local/share/git/tessera"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///Users/db/.local/share/git/tessera"
       }
     },
     "treefmt-nix": {

@@ -1,5 +1,6 @@
 {
   system = "x86_64-linux";
+  hardware = [ "lenovo-thinkpad-t460" ];
 
   features = {
     home.autostartWmOnTTY = "/dev/tty1";
@@ -32,10 +33,7 @@
     };
   };
 
-  nixos = { pkgs, inputs, ... }: {
-    imports = [
-       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t460
-    ];
+  nixos = { pkgs, ... }: {
     networking.hostName = "slimboy";
     #networking.interfaces.wlp4s0.useDHCP = true;
 

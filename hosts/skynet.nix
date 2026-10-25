@@ -1,5 +1,6 @@
 {
   system = "x86_64-linux";
+  hardware = [ "common-cpu-intel" "common-pc-ssd" ];
 
   features = { config, ... }: {
     zsh.enable = true;
@@ -36,8 +37,6 @@
   nixos = { config, inputs, pkgs, ... }:
     {
     imports = [
-      inputs.nixos-hardware.nixosModules.common-cpu-intel
-      inputs.nixos-hardware.nixosModules.common-pc-ssd
       inputs.agenix.nixosModules.default
     ];
 
