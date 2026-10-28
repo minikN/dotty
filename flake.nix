@@ -5,7 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     tessera = {
-      url = "git+file:///Users/db/.local/share/git/tessera";
+      url = "git+file:../tessera";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
