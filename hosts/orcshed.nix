@@ -116,7 +116,6 @@
     nixarr.prowlarr.settings-sync.indexers = [
       {
         sort_name = "generic newznab";
-        name = "treasure-maps";
         fields = {
           baseUrl = "https://treasure-maps.com";
           apiPath = "/api";
