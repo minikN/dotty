@@ -153,17 +153,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1792933490,
-        "narHash": "sha256-EDzLaJYTKAydAKRu9iTb/3S5czrdydCefCkX/i2Mq7k=",
-        "ref": "refs/heads/main",
-        "rev": "b8c2cff668f911d72482c0fda109eda49070ca8e",
-        "revCount": 1,
+        "dirtyRev": "409e7b4483c76de5491a8403af90df37cfebdbce-dirty",
+        "dirtyShortRev": "409e7b4-dirty",
+        "lastModified": 1793130354,
+        "narHash": "sha256-fcKoe1s3hXpNIlj+REn3kA+v4ZV9d1DqwwrCHyJDb8E=",
         "type": "git",
-        "url": "file:///Users/db/.local/share/git/tessera"
+        "url": "file:../tessera"
       },
       "original": {
         "type": "git",
-        "url": "file:///Users/db/.local/share/git/tessera"
+        "url": "file:../tessera"
       }
     },
     "treefmt-nix": {
