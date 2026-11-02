@@ -10,7 +10,8 @@ mkFeature {
       fsType = "btrfs";
     };
 
-    fileSystems."/boot" = {
+    boot.loader.efi.efiSysMountPoint = "/boot/efi";
+    fileSystems."/boot/efi" = {
       device = "/dev/disk/by-label/BOOT";
       fsType = "vfat";
     };
