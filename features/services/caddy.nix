@@ -10,7 +10,7 @@ mkFeature {
     email = mkOption {
       type = types.str;
       default = config.globals.user.email;
-      description = "ACME registration email; defaults to globals.user.email.";
+      description = "ACME registration email; defaults to globals.user.email";
     };
 
     vhosts = mkOption {
@@ -18,17 +18,17 @@ mkFeature {
         options = {
           backend = mkOption {
             type = types.str;
-            description = "Upstream URL, e.g. http://127.0.0.1:8096.";
+            description = "Upstream URL, e.g. http://127.0.0.1:8096";
           };
           extraConfig = mkOption {
             type = types.lines;
             default = "";
-            description = "Extra Caddyfile directives inside the vhost block.";
+            description = "Extra Caddyfile directives inside the vhost block";
           };
         };
       });
       default = { };
-      description = "FQDN → reverse-proxy upstream.";
+      description = "FQDN → reverse-proxy upstream";
     };
   };
 

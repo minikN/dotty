@@ -10,7 +10,7 @@ mkFeature {
     openFirewall = mkOption {
       type = types.bool;
       default = true;
-      description = "Open 8096/tcp, 8920/tcp, 1900/udp (DLNA), 7359/udp (discovery).";
+      description = "Open 8096/tcp, 8920/tcp, 1900/udp (DLNA), 7359/udp (discovery)";
     };
 
     hardwareAcceleration = mkEnableOption "VA-API hardware video transcoding" // {
@@ -20,7 +20,7 @@ mkFeature {
     mediaGroups = mkOption {
       type = types.listOf types.str;
       default = [ ];
-      description = "Extra groups for the jellyfin user (e.g. for NAS access).";
+      description = "Extra groups for the jellyfin user (e.g. for NAS access)";
     };
   };
 

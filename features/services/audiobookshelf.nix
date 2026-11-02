@@ -10,19 +10,19 @@ mkFeature {
     openFirewall = mkOption {
       type = types.bool;
       default = true;
-      description = "Open the audiobookshelf port in the firewall.";
+      description = "Open the audiobookshelf port in the firewall";
     };
 
     host = mkOption {
       type = types.str;
       default = "0.0.0.0";
-      description = "Bind address. 127.0.0.1 to restrict to localhost (caddy-only).";
+      description = "Bind address. 127.0.0.1 to restrict to localhost (caddy-only)";
     };
 
     mediaGroups = mkOption {
       type = types.listOf types.str;
       default = [ ];
-      description = "Extra groups for the audiobookshelf user (e.g. for NAS access).";
+      description = "Extra groups for the audiobookshelf user (e.g. for NAS access)";
     };
   };
 

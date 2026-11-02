@@ -10,7 +10,7 @@ mkFeature {
     bantime = mkOption {
       type = types.str;
       default = "1h";
-      description = "Ban duration (e.g. \"1h\", \"24h\", \"-1\" for permanent).";
+      description = "Ban duration (e.g. \"1h\", \"24h\", \"-1\" for permanent)";
     };
 
     ignoreIP = mkOption {
@@ -22,7 +22,7 @@ mkFeature {
         "172.16.0.0/12"
         "192.168.0.0/16"
       ];
-      description = "Addresses never to ban; LAN ranges by default.";
+      description = "Addresses never to ban; LAN ranges by default";
     };
   };
 

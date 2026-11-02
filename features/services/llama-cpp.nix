@@ -8,7 +8,7 @@ let
       hfRepo = mkOption {
         type = types.str;
         example = "Qwen/Qwen2.5-3B-Instruct-GGUF";
-        description = "HuggingFace GGUF repo, fetched on first start via `llama-server --hf-repo`.";
+        description = "HuggingFace GGUF repo, fetched on first start via `llama-server --hf-repo`";
       };
       quant = mkOption {
         type = types.nullOr types.str;
@@ -17,30 +17,30 @@ let
         description = ''
           Quantization tag; selects the file via `--hf-repo <repo>:<quant>`
           instead of an exact filename. More robust than `hfFile` (no casing
-          traps). Mutually exclusive with `hfFile`.
+          traps). Mutually exclusive with `hfFile`
         '';
       };
       hfFile = mkOption {
         type = types.nullOr types.str;
         default = null;
         example = "qwen2.5-3b-instruct-q4_k_m.gguf";
-        description = "Exact GGUF filename in the repo (`--hf-file`). Null lets llama.cpp choose; prefer `quant`.";
+        description = "Exact GGUF filename in the repo (`--hf-file`). Null lets llama.cpp choose; prefer `quant`";
       };
       host = mkOption {
         type = types.str;
         default = "127.0.0.1";
-        description = "Bind address for this model's server.";
+        description = "Bind address for this model's server";
       };
       port = mkOption {
         type = types.port;
         example = 8080;
-        description = "Listen port (must be unique across models).";
+        description = "Listen port (must be unique across models)";
       };
       settings = mkOption {
         type = types.attrs;
         default = { };
         example = { ctx-size = 8192; n-gpu-layers = 99; temp = 0.7; };
-        description = "Extra `llama-server` flags (attr name = flag), e.g. `ctx-size`, `n-gpu-layers`, `temp`, `flash-attn`.";
+        description = "Extra `llama-server` flags (attr name = flag), e.g. `ctx-size`, `n-gpu-layers`, `temp`, `flash-attn`";
       };
     };
   };
@@ -66,7 +66,7 @@ mkFeature {
         description = ''
           Acceleration backend for the default `package`. `cuda`/`rocm` need the
           matching unfree/config on the host (e.g. `nixpkgs.config.allowUnfree`).
-          Ignored if `package` is set explicitly.
+          Ignored if `package` is set explicitly
         '';
       };
 
@@ -74,13 +74,13 @@ mkFeature {
         type = types.package;
         default = pkgs.llama-cpp.override backendArgs.${cfg.backend};
         defaultText = lib.literalExpression "pkgs.llama-cpp.override (backend flags)";
-        description = "The llama.cpp package to use. Defaults to `pkgs.llama-cpp` built for `backend`.";
+        description = "The llama.cpp package to use. Defaults to `pkgs.llama-cpp` built for `backend`";
       };
 
       openFirewall = mkOption {
         type = types.bool;
         default = false;
-        description = "Open each model's port in the firewall.";
+        description = "Open each model's port in the firewall";
       };
 
       models = mkOption {
@@ -89,7 +89,7 @@ mkFeature {
         description = ''
           Models to serve; each becomes a `llama-server` systemd service
           (`llama-cpp-<name>.service`) on its own port. Extra flags go under
-          `settings`.
+          `settings`
         '';
         example = lib.literalExpression ''
           {

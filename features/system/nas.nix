@@ -10,17 +10,17 @@ mkFeature {
     host = mkOption {
       type = types.str;
       default = "10.0.0.11";
-      description = "Hostname or IP of the NAS.";
+      description = "Hostname or IP of the NAS";
     };
     mountBase = mkOption {
       type = types.str;
       default = "/mnt/nas";
-      description = "Base directory where NAS shares are mounted.";
+      description = "Base directory where NAS shares are mounted";
     };
     credentialsFile = mkOption {
       type = types.path;
       default = "/etc/nixos/smb-credentials";
-      description = "Path to the SMB credentials file.";
+      description = "Path to the SMB credentials file";
     };
     shares = mkOption {
       type = types.attrsOf types.str;
@@ -31,7 +31,7 @@ mkFeature {
         audiobooks = "audiobooks";
         temp = "temp";
       };
-      description = "Mount-name → remote-share-name map.";
+      description = "Mount-name → remote-share-name map";
     };
   };
 

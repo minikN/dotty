@@ -11,7 +11,7 @@ mkFeature {
       type = types.nullOr types.path;
       default = null;
       example = literalExpression "config.age.secrets.wg-1.path";
-      description = "WireGuard config for the VPN namespace. Use an agenix runtime path, not a store path.";
+      description = "WireGuard config for the VPN namespace. Use an agenix runtime path, not a store path";
     };
 
     vpnTestService = mkEnableOption "the VPN test service (logs public IP + DNS-leak test to `journalctl -u vpn-test-service`)";
@@ -23,13 +23,13 @@ mkFeature {
     openFirewall = mkOption {
       type = types.bool;
       default = true;
-      description = "Open enabled services' web-UI ports for LAN access.";
+      description = "Open enabled services' web-UI ports for LAN access";
     };
 
     mediaGroups = mkOption {
       type = types.listOf types.str;
       default = [ ];
-      description = "Extra groups for the Sonarr/Radarr users (e.g. \"users\" for write access to NAS libraries).";
+      description = "Extra groups for the Sonarr/Radarr users (e.g. \"users\" for write access to NAS libraries)";
     };
   };
 
