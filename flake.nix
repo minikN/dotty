@@ -27,7 +27,13 @@
 
   outputs = inputs: inputs.tessera.lib.mkFlake {
     inherit inputs;
-    globals = import ./globals.nix;
+    globals = {
+      user = "db";
+      fullName = "Demis Balbach";
+      email = "db@minikn.xyz";
+      gpgKey = "F17DDB98CC3C405C";
+      stateVersion = "26.05";
+    };
     hosts = ./hosts;
     features = ./features;
   };
