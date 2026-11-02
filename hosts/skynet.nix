@@ -20,15 +20,24 @@
 
     llama-cpp = {
       enable = true;
-      backend = "vulkan";        # RX 6650 XT (gfx1032) via Mesa RADV
+      backend = "vulkan"; # RX 6650 XT (gfx1032) via Mesa RADV
       openFirewall = true;
+      environment.GGML_VK_DISABLE_HOST_VISIBLE_VIDMEM = "1";
       models.qwen = {
-        hfRepo = "unsloth/Qwen3.5-35B-A3B-GGUF";
-        quant = "Q4_K_M";
+        hfRepo = "unsloth/Qwen3.6-35B-A3B-GGUF";
+        hfFile = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
 
-        host = "0.0.0.0";        # reachable on the LAN
+        host = "0.0.0.0";
         port = 8080;
         settings = {
+          ctx-size = 131072;
+          cache-type-k = "q8_0";
+          cache-type-v = "q8_0";
+          no-mmproj = true;
+          fit-target = 256;
+          ubatch-size = 2048;
+          #moe-cache-mib = 2048;
+          #load-mode = "none";
         };
       };
     };
