@@ -83,6 +83,13 @@ mkFeature {
         description = "Open each model's port in the firewall";
       };
 
+      environment = mkOption {
+        type = types.attrsOf types.str;
+        default = { };
+        example = { GGML_VK_DISABLE_HOST_VISIBLE_VIDMEM = "1"; };
+        description = "Extra environment variables for every `llama-server`, e.g. `GGML_VK_*` backend tuning";
+      };
+
       models = mkOption {
         type = types.attrsOf modelType;
         default = { };
@@ -157,7 +164,7 @@ mkFeature {
               ## Writable HOME so the Vulkan/RADV shader cache works; the default
               ## $HOME/.cache is unwritable under ProtectSystem=strict.
               "HOME=/var/cache/llama-cpp-${name}"
-            ];
+            ] ++ lib.mapAttrsToList (n: v: "${n}=${v}") cfg.environment;
 
             AmbientCapabilities = [ "" ];
             CapabilityBoundingSet = [ "" ];
