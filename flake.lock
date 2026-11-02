@@ -153,10 +153,10 @@
         ]
       },
       "locked": {
-        "dirtyRev": "409e7b4483c76de5491a8403af90df37cfebdbce-dirty",
-        "dirtyShortRev": "409e7b4-dirty",
-        "lastModified": 1793130354,
-        "narHash": "sha256-fcKoe1s3hXpNIlj+REn3kA+v4ZV9d1DqwwrCHyJDb8E=",
+        "dirtyRev": "b024d1efe9c63b6862ad2f339a236d614bafc053-dirty",
+        "dirtyShortRev": "b024d1e-dirty",
+        "lastModified": 1793220611,
+        "narHash": "sha256-7WGUw5A4OTvIqbHHl90IiKYbpslV1YdticDMNCwOe30=",
         "type": "git",
         "url": "file:../tessera"
       },
