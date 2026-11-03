@@ -26,21 +26,16 @@ let
         example = "qwen2.5-3b-instruct-q4_k_m.gguf";
         description = "Exact GGUF filename in the repo (`--hf-file`). Null lets llama.cpp choose; prefer `quant`";
       };
-      host = mkOption {
-        type = types.str;
-        default = "127.0.0.1";
-        description = "Bind address for this model's server";
-      };
-      port = mkOption {
-        type = types.port;
-        example = 8080;
-        description = "Listen port (must be unique across models)";
+      loadOnStartup = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Load this model when the server starts instead of on its first request";
       };
       settings = mkOption {
         type = types.attrs;
         default = { };
-        example = { ctx-size = 8192; n-gpu-layers = 99; temp = 0.7; };
-        description = "Extra `llama-server` flags (attr name = flag), e.g. `ctx-size`, `n-gpu-layers`, `temp`, `flash-attn`";
+        example = { ctx-size = 8192; temp = 0.7; };
+        description = "`llama-server` flags for this model (attr name = flag), overriding the shared `settings`";
       };
     };
   };
@@ -77,10 +72,29 @@ mkFeature {
         description = "The llama.cpp package to use. Defaults to `pkgs.llama-cpp` built for `backend`";
       };
 
+      host = mkOption {
+        type = types.str;
+        default = "127.0.0.1";
+        description = "Bind address of the server";
+      };
+
+      port = mkOption {
+        type = types.port;
+        default = 8080;
+        description = "Listen port of the server";
+      };
+
       openFirewall = mkOption {
         type = types.bool;
         default = false;
-        description = "Open each model's port in the firewall";
+        description = "Open `port` in the firewall";
+      };
+
+      settings = mkOption {
+        type = types.attrs;
+        default = { };
+        example = { ctx-size = 8192; n-gpu-layers = 99; flash-attn = "on"; };
+        description = "`llama-server` flags shared by all models (attr name = flag), e.g. `ctx-size`, `n-gpu-layers`, `flash-attn`";
       };
 
       environment = mkOption {
@@ -94,17 +108,16 @@ mkFeature {
         type = types.attrsOf modelType;
         default = { };
         description = ''
-          Models to serve; each becomes a `llama-server` systemd service
-          (`llama-cpp-<name>.service`) on its own port. Extra flags go under
-          `settings`
+          Models to serve from one `llama-server` in router mode. Requests pick
+          a model by name (the `model` field); only one is loaded at a time,
+          and requesting another one swaps it in
         '';
         example = lib.literalExpression ''
           {
             qwen = {
               hfRepo = "Qwen/Qwen2.5-3B-Instruct-GGUF";
               quant = "Q4_K_M";
-              port = 8080;
-              settings.ctx-size = 8192;
+              loadOnStartup = true;
             };
           }
         '';
@@ -116,93 +129,20 @@ mkFeature {
       cfg = config.features.llama-cpp;
       gpu = cfg.backend != "cpu";
 
-      ## Model -> llama-server CLI args. Typed fields map to their flags; extra
-      ## `settings` are passed through as `--<name> <value>`.
-      mkArgs = m:
-        {
-          hf-repo = m.hfRepo + lib.optionalString (m.quant != null) ":${m.quant}";
-          host = m.host;
-          port = m.port;
-        }
-        // lib.optionalAttrs (m.hfFile != null) { hf-file = m.hfFile; }
-        // m.settings;
-
-      ## Same flag formatting the nixpkgs services.llama-cpp module uses.
-      mkExecStart = m: toString [
-        (lib.getExe' cfg.package "llama-server")
-        (lib.cli.toCommandLine
-          (optionName: {
-            option = if builtins.stringLength optionName > 1 then "--${optionName}" else "-${optionName}";
-            sep = " ";
-            explicitBool = false;
-            formatArg = lib.generators.mkValueStringDefault { };
-          })
-          (mkArgs m))
-      ];
-
-      mkService = name: m: {
-        name = "llama-cpp-${name}";
-        value = {
-          description = "llama.cpp server (${name})";
-          wants = [ "network-online.target" ];
-          after = [ "network-online.target" ];
-          wantedBy = [ "multi-user.target" ];
-
-          serviceConfig = {
-            ExecStart = mkExecStart m;
-            ExecReload = "${lib.getExe' pkgs.coreutils "kill"} -HUP $MAINPID";
-            Restart = "on-failure";
-            RestartSec = 30;
-
-            DynamicUser = true;
-            StateDirectory = "llama-cpp-${name}";
-            CacheDirectory = "llama-cpp-${name}";
-            WorkingDirectory = "/var/lib/llama-cpp-${name}";
-            Environment = [
-              ## Where --hf-repo downloads land (persist across restarts).
-              "LLAMA_CACHE=/var/cache/llama-cpp-${name}"
-              ## Writable HOME so the Vulkan/RADV shader cache works; the default
-              ## $HOME/.cache is unwritable under ProtectSystem=strict.
-              "HOME=/var/cache/llama-cpp-${name}"
-            ] ++ lib.mapAttrsToList (n: v: "${n}=${v}") cfg.environment;
-
-            AmbientCapabilities = [ "" ];
-            CapabilityBoundingSet = [ "" ];
-            LockPersonality = true;
-            MemoryDenyWriteExecute = true;
-            NoNewPrivileges = true;
-            PrivateDevices = false; # Required for GPU support.
-            PrivateMounts = true;
-            PrivateTmp = true;
-            PrivateUsers = true;
-            ProcSubset = "pid";
-            ProtectClock = true;
-            ProtectControlGroups = true;
-            ProtectHome = true;
-            ProtectHostname = true;
-            ProtectKernelLogs = true;
-            ProtectKernelModules = true;
-            ProtectKernelTunables = true;
-            ProtectProc = "invisible";
-            ProtectSystem = "strict";
-            RemoveIPC = true;
-            RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
-            RestrictNamespaces = true;
-            RestrictRealtime = true;
-            RestrictSUIDSGID = true;
-            SystemCallArchitectures = "native";
-            SystemCallErrorNumber = "EPERM";
-            SystemCallFilter = [ "@system-service" "~@privileged" ];
+      ## Router preset: shared settings in `[*]`, one section per model
+      preset = pkgs.writeText "llama-cpp-models.ini" (lib.generators.toINIWithGlobalSection { } {
+        globalSection.version = 1;
+        sections = {
+          ## Hide the cache entries of downloaded preset models in `/models`.
+          "*" = { dedup-cache-models = true; } // cfg.settings;
+        } // lib.mapAttrs (_: m:
+          {
+            hf-repo = m.hfRepo + lib.optionalString (m.quant != null) ":${m.quant}";
+            load-on-startup = m.loadOnStartup;
           }
-          ## GPU backends: grant the DynamicUser access to the DRI render node.
-          ## PrivateUsers must be off, or the render group maps to `nobody` in
-          ## the user namespace and device access is denied.
-          // lib.optionalAttrs gpu {
-            SupplementaryGroups = [ "render" "video" ];
-            PrivateUsers = false;
-          };
-        };
-      };
+          // lib.optionalAttrs (m.hfFile != null) { hf-file = m.hfFile; }
+          // m.settings) cfg.models;
+      });
     in
     {
       assertions = lib.mapAttrsToList (name: m: {
@@ -210,9 +150,71 @@ mkFeature {
         message = "features.llama-cpp.models.${name}: set either quant or hfFile, not both.";
       }) cfg.models;
 
-      systemd.services = lib.listToAttrs (lib.mapAttrsToList mkService cfg.models);
+      systemd.services.llama-cpp = {
+        description = "llama.cpp server";
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        wantedBy = [ "multi-user.target" ];
 
-      networking.firewall.allowedTCPPorts =
-        lib.optionals cfg.openFirewall (lib.mapAttrsToList (_: m: m.port) cfg.models);
+        serviceConfig = {
+          ## One model loaded at a time; requesting another unloads it.
+          ExecStart = toString [
+            (lib.getExe' cfg.package "llama-server")
+            "--host" cfg.host
+            "--port" cfg.port
+            "--models-preset" preset
+            "--models-max" 1
+          ];
+          ExecReload = "${lib.getExe' pkgs.coreutils "kill"} -HUP $MAINPID";
+          Restart = "on-failure";
+          RestartSec = 30;
+
+          DynamicUser = true;
+          StateDirectory = "llama-cpp";
+          CacheDirectory = "llama-cpp";
+          WorkingDirectory = "/var/lib/llama-cpp";
+          Environment = [
+            ## Where --hf-repo downloads land (persist across restarts).
+            "LLAMA_CACHE=/var/cache/llama-cpp"
+            ## Writable HOME so the Vulkan/RADV shader cache works; the default
+            ## $HOME/.cache is unwritable under ProtectSystem=strict.
+            "HOME=/var/cache/llama-cpp"
+          ] ++ lib.mapAttrsToList (n: v: "${n}=${v}") cfg.environment;
+
+          AmbientCapabilities = [ "" ];
+          CapabilityBoundingSet = [ "" ];
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          NoNewPrivileges = true;
+          PrivateDevices = false; # Required for GPU support.
+          PrivateMounts = true;
+          PrivateTmp = true;
+          PrivateUsers = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectControlGroups = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectKernelModules = true;
+          ProtectKernelTunables = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          SystemCallArchitectures = "native";
+          SystemCallErrorNumber = "EPERM";
+          SystemCallFilter = [ "@system-service" "~@privileged" ];
+        }
+        // lib.optionalAttrs gpu {
+          SupplementaryGroups = [ "render" "video" ];
+          PrivateUsers = false;
+        };
+      };
+
+      networking.firewall.allowedTCPPorts = lib.optional cfg.openFirewall cfg.port;
     };
 }
