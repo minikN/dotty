@@ -111,6 +111,12 @@
       ssl = true;
       connections = 20;
     };
+    services.sabnzbd.settings.misc = {
+      download_free = "20G";
+      direct_unpack = false;
+      direct_unpack_tested = true; # forbids re-enabling it
+      pause_on_post_processing = true;
+    };
     services.sabnzbd.secretFiles = [ config.age.secrets."sabnzbd-creds".path ];
 
     nixarr.prowlarr.settings-sync.indexers = [
