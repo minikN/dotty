@@ -45,6 +45,7 @@
       prowlarr = true;
       sonarr = true;
       radarr = true;
+      lidarr = true;
       mediaGroups = [ "users" ];
       wgConf = config.age.secrets."wg-1.conf".path;
     };
