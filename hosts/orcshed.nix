@@ -35,7 +35,7 @@
 
     jellyfin = {
       enable = true;
-      openFirewall = false;
+      openFirewall = true;
       mediaGroups = [ "users" ];
     };
 
